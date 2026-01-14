@@ -280,7 +280,7 @@
   <!-- Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  // --- Inyectar el motor de Firebase ---
+  // --- crea el MOTOR para tablas en Firebase ---
   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -301,8 +301,47 @@
         window.dbCloud = db;
         window.addDoc = addDoc;
         window.collection = collection;
+
+
+	 // FUNCIÓN PARA DESCARGAR DATOS AL INICIAR en otros pc
+        async function descargarDatosNube() {
+            try {
+                const q = query(collection(db, "registros_v2026"), orderBy("fecha_sincro", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                let registrosNube = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Si el dato es de tipo 'trabajadores' o 'fichajes'
+                    if (data.tipo_dato === 'trabajadores' || data.tipo_dato === 'fichajes') {
+                        registrosNube.push(data.contenido);
+                    }
+                });
+
+				// --- SUSTITUCIÓN DESDE LA LÍNEA 321 ---
+                if (registrosNube.length > 0) {
+                    // Cogemos la copia más reciente de la nube
+                    const ultimaCopia = registrosNube[0];
+                    
+                    // Actualizamos la memoria del navegador con los datos de la nube
+                    localStorage.setItem('trabajadores', JSON.stringify(ultimaCopia));
+                    
+                    console.log("✅ Datos de la nube cargados con éxito.");
+
+                    // Refrescamos la tabla para que veas los cambios
+                    if (typeof render === 'function') {
+                        render();
+                    }
+                }
+            } catch (error) {
+                console.error("❌ Error al descargar de la nube:", error);
+            }
+        }
+
+        // Ejecutar la descarga al abrir la web
+        descargarDatosNube(); 
     </script>
-</head>
+</head> 
 <body class="p-4">
   <!-- Barra de confirmaciones superior -->
   <div id="top-banner" class="top-banner" role="status" aria-live="polite" aria-atomic="true" hidden></div>
