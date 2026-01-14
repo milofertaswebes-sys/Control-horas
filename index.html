@@ -279,6 +279,29 @@
 
   <!-- Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  // --- Inyectar el motor de Firebase ---
+  <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI1nLERKCHwMluF5NYbBgLuxmUbJ6REmQ",
+            authDomain: "controlhorasgines.firebaseapp.com",
+            projectId: "controlhorasgines",
+            storageBucket: "controlhorasgines.firebasestorage.app",
+            messagingSenderId: "32537920791",
+            appId: "1:32537920791:web:d1852e2e6220e71913a352"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Hacemos que la base de datos y las funciones de Firebase sean accesibles
+        window.dbCloud = db;
+        window.addDoc = addDoc;
+        window.collection = collection;
+    </script>
 </head>
 <body class="p-4">
   <!-- Barra de confirmaciones superior -->
@@ -703,6 +726,22 @@
     function lsSet(key, value) {
       try {
         localStorage.setItem(key, JSON.stringify(value));
+		
+		// --- INICIO CÓDIGO CLOUD ---
+try {
+    if (window.dbCloud) {
+        const cloudCol = window.collection(window.dbCloud, "copias_seguridad");
+        window.addDoc(cloudCol, {
+            tipo: key,
+            datos: value,
+            timestamp: new Date().toISOString(),
+            usuario: "Sistema_Gines"
+        });
+    }
+} catch (e) {
+    console.error("Error al sincronizar con la nube:", e);
+}
+// --- FIN CÓDIGO CLOUD ---
       } catch (e) {
         showBanner("⚠️ No se pudo guardar en este navegador (localStorage).", "warning");
         throw e;
