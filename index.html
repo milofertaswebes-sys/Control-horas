@@ -307,30 +307,62 @@ window.query = query;
 window.orderBy = orderBy;
 
 
-// Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
-      document.getElementById("btnLogin").addEventListener("click", async () => {
-        const usuario = document.getElementById("loginUsuario").value;
-        const password = document.getElementById("loginPassword").value;
-        const errorDiv = document.getElementById("loginError");
-        
-        if (login(usuario, password)) {
-          console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
-          
-          // Obligamos al programa a esperar a que los datos bajen
-          await descargarDatosNube(); 
-          
-          // Una vez bajados, volvemos a renderizar por si acaso
-          if (typeof render === 'function') render();
-          
-          errorDiv.classList.add("hidden");
-          console.log("🚀 Sincronización completada al iniciar sesión.");
-        } else {
-          errorDiv.textContent = "Usuario o contraseña incorrectos";
-          errorDiv.classList.remove("hidden");
-        }
-      });
+// 1. PRIMERO DEFINIMOS LA FUNCIÓN (Para que el botón la encuentre)
+        async function descargarDatosNube() {
+            try {
+                console.log("🔄 Iniciando sincronización profunda...");
+                const baseDatos = window.dbCloud || db; 
+                
+                if (!baseDatos) {
+                    console.error("❌ Error: Base de datos no inicializada.");
+                    return;
+                }
 
-        // --- EJECUCIÓN AUTOMÁTICA AL ABRIR ---
+                // Traemos los últimos 10 documentos para asegurar que pillamos trabajadores y registros
+                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.tipo_dato === 'trabajadores') {
+                        localStorage.setItem('trabajadores', JSON.stringify(data.contenido || []));
+                        console.log("✅ Trabajadores actualizados.");
+                    }
+                    if (data.tipo_dato === 'registros') {
+                        localStorage.setItem('registros_v2026', JSON.stringify(data.contenido || []));
+                        console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE.");
+                    }
+                });
+
+                // Dibujamos la tabla con los datos frescos
+                if (typeof render === 'function') render();
+                
+            } catch (error) {
+                console.error("❌ Error en descargarDatosNube:", error);
+            }
+        }
+
+        // 2. LUEGO EL EVENTO DEL BOTÓN DE LOGIN
+        document.getElementById("btnLogin").addEventListener("click", async () => {
+            const usuario = document.getElementById("loginUsuario").value;
+            const password = document.getElementById("loginPassword").value;
+            const errorDiv = document.getElementById("loginError");
+            
+            if (login(usuario, password)) {
+                console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
+                
+                // Esperamos a que la descarga termine antes de entrar
+                await descargarDatosNube(); 
+                
+                errorDiv.classList.add("hidden");
+                console.log("🚀 Sincronización completada. Entrando...");
+            } else {
+                errorDiv.textContent = "Usuario o contraseña incorrectos";
+                errorDiv.classList.remove("hidden");
+            }
+        });
+
+        // 3. EJECUCIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (OPCIONAL)
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
