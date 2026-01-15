@@ -335,12 +335,29 @@ window.orderBy = orderBy;
                     if (typeof render === 'function') {
                         render();
                     }
-                }
+}
             } catch (error) {
                 console.error("❌ Error al descargar de la nube:", error);
             }
         }
 
+        // --- FORZAR CARGA AL INICIAR ---
+        // Esperamos 2 segundos para que la conexión sea estable y luego descargamos
+        setTimeout(() => {
+            console.log("🔄 Sincronizando datos con la nube...");
+            descargarDatosNube();
+        }, 2000);
+
+    </script>
+
+    // --- FORZAR CARGA AL INICIAR ---
+    // Esperamos 2 segundos para que la conexión sea estable y luego descargamos
+    setTimeout(() => {
+        console.log("🔄 Sincronizando datos con la nube...");
+        descargarDatosNube();
+    }, 2000);
+
+</script>
 
     // 2. Cargamos los datos nuevos y limpios de la nube
     descargarDatosNube();
