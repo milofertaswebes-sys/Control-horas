@@ -774,22 +774,24 @@ window.orderBy = orderBy;
       try {
         localStorage.setItem(key, JSON.stringify(value));
 		
-		// --- INICIO CÓDIGO CLOUD ---
-
+// --- INICIO CÓDIGO CLOUD ---
 try {
     if (window.dbCloud) {
-        const cloudCol = window.collection(window.dbCloud, "copias_seguridad");
+        // CORRECCIÓN: Usamos "registros_v2026" para que coincida con la descarga
+        const cloudCol = window.collection(window.dbCloud, "registros_v2026");
+
         window.addDoc(cloudCol, {
-            tipo_dato: "trabajadores", // Cambiado 'tipo' por 'tipo_dato'
-            contenido: value,          // Cambiado 'datos' por 'contenido'
+            // Clasifica automáticamente si es la lista de nombres o un fichaje
+            tipo_dato: (key === 'trabajadores') ? "trabajadores" : "fichajes",
+            contenido: value, 
             timestamp: new Date().toISOString(),
             usuario: "Sistema_Gines"
         });
+        console.log("✅ Sincronizado en la colección registros_v2026");
     }
 } catch (e) {
-    console.error("Error al sincronizar con la nube:", e);
+    console.error("❌ Error al sincronizar con la nube:", e);
 }
-
 // --- FIN CÓDIGO CLOUD ---
       } catch (e) {
         showBanner("⚠️ No se pudo guardar en este navegador (localStorage).", "warning");
