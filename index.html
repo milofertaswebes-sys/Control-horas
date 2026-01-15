@@ -307,7 +307,7 @@ window.query = query;
 window.orderBy = orderBy;
 
 
-	// FUNCIÓN ÚNICA PARA DESCARGAR DATOS AL INICIAR
+// FUNCIÓN ÚNICA PARA DESCARGAR DATOS AL INICIAR
         async function descargarDatosNube() {
             try {
                 // Consultamos la nube buscando lo más reciente por timestamp
@@ -335,37 +335,21 @@ window.orderBy = orderBy;
                     if (typeof render === 'function') {
                         render();
                     }
-}
+                }
             } catch (error) {
                 console.error("❌ Error al descargar de la nube:", error);
             }
         }
 
-        // --- FORZAR CARGA AL INICIAR ---
-        // Esperamos 2 segundos para que la conexión sea estable y luego descargamos
+        // --- FORZAR CARGA ÚNICA AL INICIAR ---
+        // Esperamos 2 segundos para asegurar conexión y ejecutamos una sola vez
         setTimeout(() => {
             console.log("🔄 Sincronizando datos con la nube...");
             descargarDatosNube();
         }, 2000);
 
     </script>
-
-    // --- FORZAR CARGA AL INICIAR ---
-    // Esperamos 2 segundos para que la conexión sea estable y luego descargamos
-    setTimeout(() => {
-        console.log("🔄 Sincronizando datos con la nube...");
-        descargarDatosNube();
-    }, 2000);
-
-</script>
-
-    // 2. Cargamos los datos nuevos y limpios de la nube
-    descargarDatosNube();
-	  
-	
-
-    </script>
-</head> 
+</head>
 <body class="p-4">
   <!-- Barra de confirmaciones superior -->
   <div id="top-banner" class="top-banner" role="status" aria-live="polite" aria-atomic="true" hidden></div>
