@@ -1508,17 +1508,23 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
-     // Login - MODIFICADO PARA SINCRONIZAR AL ENTRAR
-      document.getElementById("btnLogin").addEventListener("click", () => {
+   // Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
+      document.getElementById("btnLogin").addEventListener("click", async () => {
         const usuario = document.getElementById("loginUsuario").value;
         const password = document.getElementById("loginPassword").value;
         const errorDiv = document.getElementById("loginError");
         
         if (login(usuario, password)) {
-          // --- ESTA ES LA LÍNEA CLAVE QUE HEMOS AÑADIDO ---
-          descargarDatosNube(); 
+          console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
+          
+          // Obligamos al programa a esperar a que los datos bajen
+          await descargarDatosNube(); 
+          
+          // Una vez bajados, volvemos a renderizar por si acaso
+          if (typeof render === 'function') render();
           
           errorDiv.classList.add("hidden");
+          console.log("🚀 Sincronización completada al iniciar sesión.");
         } else {
           errorDiv.textContent = "Usuario o contraseña incorrectos";
           errorDiv.classList.remove("hidden");
