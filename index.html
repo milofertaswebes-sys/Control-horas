@@ -340,8 +340,13 @@ window.orderBy = orderBy;
             }
         }
 
-        // Ejecutar la descarga al abrir la web
-        descargarDatosNube();
+// 1. Borramos los datos antiguos con errores
+    localStorage.removeItem('trabajadores'); 
+
+    // 2. Cargamos los datos nuevos y limpios de la nube
+    descargarDatosNube();
+	  
+	
 
     </script>
 </head> 
