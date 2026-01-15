@@ -307,10 +307,7 @@ window.query = query;
 window.orderBy = orderBy;
 
 
-// --- FUNCIÓN ÚNICA PARA DESCARGAR TODO (TRABAJADORES Y HORAS) ---
-        async function descargarDatosNube() {
-            try {
-   // --- FUNCIÓN ÚNICA Y DEFINITIVA DE SINCRONIZACIÓN ---
+// --- FUNCIÓN ÚNICA Y DEFINITIVA DE SINCRONIZACIÓN ---
         async function descargarDatosNube() {
             try {
                 console.log("🔄 Sincronizando datos con la nube...");
@@ -328,15 +325,17 @@ window.orderBy = orderBy;
                     const cTrabajadores = registrosNube.find(r => r.tipo_dato === 'trabajadores');
                     if (cTrabajadores) {
                         localStorage.setItem('trabajadores', JSON.stringify(cTrabajadores.contenido || []));
+                        console.log("✅ Lista de trabajadores actualizada.");
                     }
 
-                    // 2. Sincronizar Horas (Esto es lo que le falta al PC 1)
+                    // 2. Sincronizar Horas (Clave para que el PC 1 vea lo que hizo el PC 2)
                     const cHoras = registrosNube.find(r => r.tipo_dato === 'registros');
                     if (cHoras) {
                         localStorage.setItem('registros_v2026', JSON.stringify(cHoras.contenido || []));
-                        console.log("✅ Datos actualizados desde la nube (Trabajadores + Horas).");
+                        console.log("✅ Horas y marcajes actualizados desde la nube.");
                     }
 
+                    // Refrescamos la tabla visualmente
                     if (typeof render === 'function') render();
                 }
             } catch (error) {
@@ -344,12 +343,12 @@ window.orderBy = orderBy;
             }
         }
 
-        // --- EJECUCIÓN AL ABRIR LA APP ---
+        // --- EJECUCIÓN AUTOMÁTICA AL ABRIR ---
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
 
-    </script>   
+    </script>
 </head>
 <body class="p-4">
   <!-- Barra de confirmaciones superior -->
