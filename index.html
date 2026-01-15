@@ -307,7 +307,7 @@ window.query = query;
 window.orderBy = orderBy;
 
 
-// --- FUNCIÓN ÚNICA PARA DESCARGAR DATOS AL INICIAR ---
+// --- FUNCIÓN ÚNICA PARA DESCARGAR TODO (TRABAJADORES Y HORAS) ---
         async function descargarDatosNube() {
             try {
                 console.log("🔄 Sincronizando datos con la nube...");
@@ -322,30 +322,33 @@ window.orderBy = orderBy;
                 });
 
                 if (registrosNube.length > 0) {
-                    const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
+                    // 1. SINCRONIZAR LISTA DE TRABAJADORES
+                    const copiaTrabajadores = registrosNube.find(r => r.tipo_dato === 'trabajadores');
+                    if (copiaTrabajadores) {
+                        localStorage.setItem('trabajadores', JSON.stringify(copiaTrabajadores.contenido || []));
+                        console.log("✅ Lista de trabajadores sincronizada.");
+                    }
 
-                    if (copiaValida) {
-                        const datosLimpios = copiaValida.contenido || []; 
-                        
-                        // Guardamos en el navegador
-                        localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                        console.log("✅ Datos de trabajadores sincronizados.");
-                        
-                        // DIBUJAMOS LA TABLA (Sin refrescar la página)
-                        if (typeof render === 'function') {
-                            render();
-                        }
-                    } else {
-                        console.log("⚠️ No se encontró la etiqueta 'trabajadores'.");
+                    // 2. SINCRONIZAR REGISTROS DE HORAS (MARCAJES)
+                    // Buscamos el documento que contiene las horas de inicio/fin
+                    const copiaHoras = registrosNube.find(r => r.tipo_dato === 'registros');
+                    if (copiaHoras) {
+                        localStorage.setItem('registros_v2026', JSON.stringify(copiaHoras.contenido || []));
+                        console.log("✅ Horas y marcajes sincronizados.");
+                    }
+
+                    // DIBUJAMOS LA TABLA CON LOS DATOS NUEVOS
+                    if (typeof render === 'function') {
+                        render();
                     }
                 }
             } catch (error) {
-                console.error("❌ Error al descargar:", error);
+                console.error("❌ Error al descargar de la nube:", error);
             }
         }
 
         // --- EJECUCIÓN ÚNICA AL INICIAR ---
-        // Se ejecuta una sola vez a los 2 segundos de abrir la web
+        // Esperamos 2 segundos para asegurar la conexión y descargamos todo
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
