@@ -327,29 +327,42 @@ window.orderBy = orderBy;
                     const ultimaCopia = registrosNube[0];
                     
                // ACTUALIZAMOS la memoria del navegador con los datos de la nube
-            if (registrosNube.length > 0) {
-                // BUSCAMOS SOLO EL REGISTRO DE TRABAJADORES (Filtro de seguridad)
-                const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
+            // FUNCIÓN PARA DESCARGAR DATOS AL INICIAR en otros pc
+        async function descargarDatosNube() {
+            try {
+                const q = query(collection(db, "registros_v2026"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                let registrosNube = [];
+                querySnapshot.forEach((doc) => {
+                    registrosNube.push(doc.data());
+                });
 
-                if (copiaValida) {
-                    const datosLimpios = copiaValida.contenido || []; 
-                    localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                    console.log("✅ Datos de trabajadores cargados con éxito.");
-                } else {
-                    console.log("⚠️ No se encontraron trabajadores en la nube.");
-                }
+                if (registrosNube.length > 0) {
+                    // BUSCAMOS SOLO EL REGISTRO DE TRABAJADORES (Filtro de seguridad)
+                    const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
 
-                // Refrescamos la tabla para que veas los cambios
-                if (typeof render === 'function') {
-                    render();
+                    if (copiaValida) {
+                        const datosLimpios = copiaValida.contenido || []; 
+                        localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
+                        console.log("✅ Datos de trabajadores cargados con éxito.");
+                    } else {
+                        console.log("⚠️ No se encontraron trabajadores con etiqueta en la nube.");
+                    }
+
+                    // Refrescamos la tabla para que veas los cambios
+                    if (typeof render === 'function') {
+                        render();
+                    }
                 }
+            } catch (error) {
+                console.error("❌ Error al descargar de la nube:", error);
             }
-        } catch (error) {
-            console.error("❌ Error al descargar de la nube:", error);
         }
 
         // Ejecutar la descarga al abrir la web
-        descargarDatosNube(); 
+        descargarDatosNube();
+
     </script>
 </head> 
 <body class="p-4">
