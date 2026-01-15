@@ -1588,6 +1588,68 @@ try {
       // Inicializar UI
       refreshUI();
     });
+	  // --- BLOQUE ÚNICO: SINCRONIZACIÓN + LOGIN + VISIBILIDAD (CORREGIDO) ---
+
+async function descargarDatosNube() {
+    try {
+        console.log("🔄 Iniciando sincronización profunda...");
+        const baseDatos = window.dbCloud || db; 
+        if (!baseDatos) return;
+
+        const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.tipo_dato === 'trabajadores') {
+                localStorage.setItem('trabajadores', JSON.stringify(data.contenido || []));
+            }
+            if (data.tipo_dato === 'registros') {
+                localStorage.setItem('registros_v2026', JSON.stringify(data.contenido || []));
+                console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE.");
+            }
+        });
+
+        if (typeof render === 'function') render();
+    } catch (error) {
+        console.error("❌ Error en descargarDatosNube:", error);
+    }
+}
+
+// TODO LO QUE BUSCA BOTONES VA AQUÍ ADENTRO:
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Botón de Login
+    const btnLogin = document.getElementById("btnLogin");
+    if (btnLogin) {
+        btnLogin.addEventListener("click", async () => {
+            if (login(document.getElementById("loginUsuario").value, document.getElementById("loginPassword").value)) {
+                await descargarDatosNube(); 
+                document.getElementById("loginError").classList.add("hidden");
+                console.log("🚀 Entrando con datos sincronizados.");
+            } else {
+                document.getElementById("loginError").classList.remove("hidden");
+                document.getElementById("loginError").textContent = "Usuario o contraseña incorrectos";
+            }
+        });
+    }
+
+    // 2. Botones de "Mostrar Contraseña" (Ojos)
+    const toggles = [
+        { id: "toggleLoginPassword", input: "loginPassword" },
+        { id: "toggleNuevaPassword", input: "nuevaPassword" },
+        { id: "toggleConfirmarPassword", input: "confirmarPassword" }
+    ];
+
+    toggles.forEach(t => {
+        const btn = document.getElementById(t.id);
+        if (btn) {
+            btn.addEventListener("click", () => togglePasswordVisibility(t.input, t.id));
+        }
+    });
+});
+
+setTimeout(descargarDatosNube, 2000);
   </script>
 </body>
 </html>
