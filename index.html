@@ -1508,13 +1508,16 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
-      // Login
+     // Login - MODIFICADO PARA SINCRONIZAR AL ENTRAR
       document.getElementById("btnLogin").addEventListener("click", () => {
         const usuario = document.getElementById("loginUsuario").value;
         const password = document.getElementById("loginPassword").value;
         const errorDiv = document.getElementById("loginError");
         
         if (login(usuario, password)) {
+          // --- ESTA ES LA LÍNEA CLAVE QUE HEMOS AÑADIDO ---
+          descargarDatosNube(); 
+          
           errorDiv.classList.add("hidden");
         } else {
           errorDiv.textContent = "Usuario o contraseña incorrectos";
