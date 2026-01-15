@@ -311,11 +311,8 @@ window.orderBy = orderBy;
         async function descargarDatosNube() {
             try {
                 console.log("🔄 Sincronizando datos con la nube...");
-                
-                // Usamos window.dbCloud para asegurar la conexión con Firebase
                 const baseDatos = window.dbCloud || db; 
                 
-                // Buscamos en la colección "registros_v2026" ordenado por fecha
                 const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -325,41 +322,30 @@ window.orderBy = orderBy;
                 });
 
                 if (registrosNube.length > 0) {
-                    // Buscamos el último registro que sea de tipo 'trabajadores'
                     const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
 
                     if (copiaValida) {
                         const datosLimpios = copiaValida.contenido || []; 
                         
-                        // Guardamos en el navegador (LocalStorage)
+                        // Guardamos en LocalStorage
                         localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                        console.log("✅ Datos de trabajadores cargados con éxito:", datosLimpios);
+                        console.log("✅ Datos cargados correctamente.");
                         
-                        // Intentamos dibujar la tabla en pantalla inmediatamente
+                        // IMPORTANTE: Solo dibujamos la tabla, NO reiniciamos la pantalla
                         if (typeof render === 'function') {
                             render();
                         }
-
-                        // TRUCO DE SEGURIDAD: Si después de 3 segundos la tabla sigue vacía, refrescamos
-                        setTimeout(() => {
-                            const tabla = document.querySelector("#tablaTrabajadores tbody");
-                            if (!tabla || tabla.children.length === 0) {
-                                console.log("Refresco automático para mostrar datos...");
-                                window.location.reload();
-                            }
-                        }, 1000);
-
-                    } else {
-                        console.log("⚠️ No se encontraron documentos con la etiqueta 'trabajadores'.");
+                        if (typeof actualizarTablaTrabajadores === 'function') {
+                            actualizarTablaTrabajadores();
+                        }
                     }
                 }
             } catch (error) {
-                console.error("❌ Error al descargar de la nube:", error);
+                console.error("❌ Error en la descarga:", error);
             }
         }
 
-        // --- FORZAR CARGA ÚNICA AL INICIAR ---
-        // Esperamos 2 segundos para asegurar conexión y ejecutamos una sola vez
+        // --- EJECUCIÓN ÚNICA AL INICIAR ---
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
