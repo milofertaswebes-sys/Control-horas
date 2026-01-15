@@ -311,8 +311,8 @@ window.orderBy = orderBy;
         async function descargarDatosNube() {
             try {
                 console.log("🔄 Sincronizando datos con la nube...");
-                const baseDatos = window.dbCloud || db; 
                 
+                const baseDatos = window.dbCloud || db; 
                 const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -327,25 +327,25 @@ window.orderBy = orderBy;
                     if (copiaValida) {
                         const datosLimpios = copiaValida.contenido || []; 
                         
-                        // Guardamos en LocalStorage
+                        // Guardamos en el navegador
                         localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                        console.log("✅ Datos cargados correctamente.");
+                        console.log("✅ Datos de trabajadores sincronizados.");
                         
-                        // IMPORTANTE: Solo dibujamos la tabla, NO reiniciamos la pantalla
+                        // DIBUJAMOS LA TABLA (Sin refrescar la página)
                         if (typeof render === 'function') {
                             render();
                         }
-                        if (typeof actualizarTablaTrabajadores === 'function') {
-                            actualizarTablaTrabajadores();
-                        }
+                    } else {
+                        console.log("⚠️ No se encontró la etiqueta 'trabajadores'.");
                     }
                 }
             } catch (error) {
-                console.error("❌ Error en la descarga:", error);
+                console.error("❌ Error al descargar:", error);
             }
         }
 
         // --- EJECUCIÓN ÚNICA AL INICIAR ---
+        // Se ejecuta una sola vez a los 2 segundos de abrir la web
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
