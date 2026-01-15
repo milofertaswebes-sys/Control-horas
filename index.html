@@ -326,21 +326,26 @@ window.orderBy = orderBy;
                     // Cogemos la copia más reciente de la nube
                     const ultimaCopia = registrosNube[0];
                     
-                    // Actualizamos la memoria del navegador con los datos de la nube
-                    // Extraemos solo los nombres y datos, no los códigos de Firebase
-const datosLimpios = ultimaCopia.contenido || []; 
-localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                    
-                    console.log("✅ Datos de la nube cargados con éxito.");
+               // ACTUALIZAMOS la memoria del navegador con los datos de la nube
+            if (registrosNube.length > 0) {
+                // BUSCAMOS SOLO EL REGISTRO DE TRABAJADORES (Filtro de seguridad)
+                const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
 
-                    // Refrescamos la tabla para que veas los cambios
-                    if (typeof render === 'function') {
-                        render();
-                    }
+                if (copiaValida) {
+                    const datosLimpios = copiaValida.contenido || []; 
+                    localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
+                    console.log("✅ Datos de trabajadores cargados con éxito.");
+                } else {
+                    console.log("⚠️ No se encontraron trabajadores en la nube.");
                 }
-            } catch (error) {
-                console.error("❌ Error al descargar de la nube:", error);
+
+                // Refrescamos la tabla para que veas los cambios
+                if (typeof render === 'function') {
+                    render();
+                }
             }
+        } catch (error) {
+            console.error("❌ Error al descargar de la nube:", error);
         }
 
         // Ejecutar la descarga al abrir la web
@@ -772,12 +777,13 @@ localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
         localStorage.setItem(key, JSON.stringify(value));
 		
 		// --- INICIO CÓDIGO CLOUD ---
+
 try {
     if (window.dbCloud) {
         const cloudCol = window.collection(window.dbCloud, "copias_seguridad");
         window.addDoc(cloudCol, {
-            tipo: key,
-            datos: value,
+            tipo_dato: "trabajadores", // Cambiado 'tipo' por 'tipo_dato'
+            contenido: value,          // Cambiado 'datos' por 'contenido'
             timestamp: new Date().toISOString(),
             usuario: "Sistema_Gines"
         });
@@ -785,6 +791,7 @@ try {
 } catch (e) {
     console.error("Error al sincronizar con la nube:", e);
 }
+
 // --- FIN CÓDIGO CLOUD ---
       } catch (e) {
         showBanner("⚠️ No se pudo guardar en este navegador (localStorage).", "warning");
