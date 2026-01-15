@@ -310,50 +310,46 @@ window.orderBy = orderBy;
 // --- FUNCIÓN ÚNICA PARA DESCARGAR TODO (TRABAJADORES Y HORAS) ---
         async function descargarDatosNube() {
             try {
+   // --- FUNCIÓN ÚNICA Y DEFINITIVA DE SINCRONIZACIÓN ---
+        async function descargarDatosNube() {
+            try {
                 console.log("🔄 Sincronizando datos con la nube...");
-                
                 const baseDatos = window.dbCloud || db; 
                 const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 let registrosNube = [];
-                querySnapshot.forEach((doc) => {
-                    registrosNube.push(doc.data());
+                querySnapshot.forEach((doc) => { 
+                    registrosNube.push(doc.data()); 
                 });
 
                 if (registrosNube.length > 0) {
-                    // 1. SINCRONIZAR LISTA DE TRABAJADORES
-                    const copiaTrabajadores = registrosNube.find(r => r.tipo_dato === 'trabajadores');
-                    if (copiaTrabajadores) {
-                        localStorage.setItem('trabajadores', JSON.stringify(copiaTrabajadores.contenido || []));
-                        console.log("✅ Lista de trabajadores sincronizada.");
+                    // 1. Sincronizar Trabajadores
+                    const cTrabajadores = registrosNube.find(r => r.tipo_dato === 'trabajadores');
+                    if (cTrabajadores) {
+                        localStorage.setItem('trabajadores', JSON.stringify(cTrabajadores.contenido || []));
                     }
 
-                    // 2. SINCRONIZAR REGISTROS DE HORAS (MARCAJES)
-                    // Buscamos el documento que contiene las horas de inicio/fin
-                    const copiaHoras = registrosNube.find(r => r.tipo_dato === 'registros');
-                    if (copiaHoras) {
-                        localStorage.setItem('registros_v2026', JSON.stringify(copiaHoras.contenido || []));
-                        console.log("✅ Horas y marcajes sincronizados.");
+                    // 2. Sincronizar Horas (Esto es lo que le falta al PC 1)
+                    const cHoras = registrosNube.find(r => r.tipo_dato === 'registros');
+                    if (cHoras) {
+                        localStorage.setItem('registros_v2026', JSON.stringify(cHoras.contenido || []));
+                        console.log("✅ Datos actualizados desde la nube (Trabajadores + Horas).");
                     }
 
-                    // DIBUJAMOS LA TABLA CON LOS DATOS NUEVOS
-                    if (typeof render === 'function') {
-                        render();
-                    }
+                    if (typeof render === 'function') render();
                 }
             } catch (error) {
-                console.error("❌ Error al descargar de la nube:", error);
+                console.error("❌ Error sincronizando:", error);
             }
         }
 
-        // --- EJECUCIÓN ÚNICA AL INICIAR ---
-        // Esperamos 2 segundos para asegurar la conexión y descargamos todo
+        // --- EJECUCIÓN AL ABRIR LA APP ---
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
 
-    </script>
+    </script>   
 </head>
 <body class="p-4">
   <!-- Barra de confirmaciones superior -->
