@@ -340,22 +340,6 @@ window.orderBy = orderBy;
             }
         }
 
-        document.getElementById("btnLogin").addEventListener("click", async () => {
-            const usuario = document.getElementById("loginUsuario").value;
-            const password = document.getElementById("loginPassword").value;
-            const errorDiv = document.getElementById("loginError");
-            
-            if (login(usuario, password)) {
-                console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
-                await descargarDatosNube(); 
-                errorDiv.classList.add("hidden");
-                console.log("🚀 Sincronización completada. Entrando...");
-            } else {
-                errorDiv.textContent = "Usuario o contraseña incorrectos";
-                errorDiv.classList.remove("hidden");
-            }
-        });
-
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
@@ -1051,7 +1035,8 @@ try {
         const salida = new Date(`${abierto.fecha}T${abierto.salidaISO}`);
         const diffMs = salida - entrada;
         const diffHrs = diffMs / (1000 * 60 * 60);
-        abierto.horas = Math.max(0, Math.round(diffHrs * 100) / 100);
+        const horas = Math.max(0, Math.round(diffHrs * 100) / 100);
+        abierto.horas = horas;
         
         guardarDatos();
         refreshUI();
@@ -1471,7 +1456,7 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
-   // Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
+      // Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
       document.getElementById("btnLogin").addEventListener("click", async () => {
         const usuario = document.getElementById("loginUsuario").value;
         const password = document.getElementById("loginPassword").value;
@@ -1484,7 +1469,7 @@ try {
           await descargarDatosNube(); 
           
           // Una vez bajados, volvemos a renderizar por si acaso
-          if (typeof render === 'function') render();
+          if (typeof refreshUI === 'function') refreshUI();
           
           errorDiv.classList.add("hidden");
           console.log("🚀 Sincronización completada al iniciar sesión.");
@@ -1500,12 +1485,6 @@ try {
       // Toggle password visibility
       document.getElementById("toggleLoginPassword").addEventListener("click", () => {
         togglePasswordVisibility("loginPassword", "toggleLoginPassword");
-      });
-      document.getElementById("toggleNuevaPassword").addEventListener("click", () => {
-        togglePasswordVisibility("nuevaPassword", "toggleNuevaPassword");
-      });
-      document.getElementById("toggleConfirmarPassword").addEventListener("click", () => {
-        togglePasswordVisibility("confirmarPassword", "toggleConfirmarPassword");
       });
 
       // Alta
@@ -1558,12 +1537,6 @@ try {
       document.getElementById("btnCancelarManual").addEventListener("click", cerrarModalRegistroManual);
       document.getElementById("btnGuardarManual").addEventListener("click", guardarRegistroManual);
 
-      // Cambio de contraseña
-      document.getElementById("btnCambioPass").addEventListener("click", abrirModalCambioPass);
-      document.getElementById("cerrarModalPass").addEventListener("click", cerrarModalCambioPass);
-      document.getElementById("btnCancelarPass").addEventListener("click", cerrarModalCambioPass);
-      document.getElementById("btnGuardarPass").addEventListener("click", guardarCambioPass);
-
       // Editar registro
       document.getElementById("cerrarModalEditar").addEventListener("click", cerrarModalEditarRegistro);
       document.getElementById("btnCancelarEditar").addEventListener("click", cerrarModalEditarRegistro);
@@ -1572,13 +1545,9 @@ try {
       // Cerrar modales al hacer clic fuera
       window.addEventListener("click", (e) => {
         const modalRegistro = document.getElementById("modalRegistroManual");
-        const modalPass = document.getElementById("modalCambioPass");
         const modalEditar = document.getElementById("modalEditarRegistro");
         if (e.target === modalRegistro) {
           cerrarModalRegistroManual();
-        }
-        if (e.target === modalPass) {
-          cerrarModalCambioPass();
         }
         if (e.target === modalEditar) {
           cerrarModalEditarRegistro();
@@ -1588,68 +1557,6 @@ try {
       // Inicializar UI
       refreshUI();
     });
-	  // --- BLOQUE ÚNICO: SINCRONIZACIÓN + LOGIN + VISIBILIDAD (CORREGIDO) ---
-
-async function descargarDatosNube() {
-    try {
-        console.log("🔄 Iniciando sincronización profunda...");
-        const baseDatos = window.dbCloud || db; 
-        if (!baseDatos) return;
-
-        const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.tipo_dato === 'trabajadores') {
-                localStorage.setItem('trabajadores', JSON.stringify(data.contenido || []));
-            }
-            if (data.tipo_dato === 'registros') {
-                localStorage.setItem('registros_v2026', JSON.stringify(data.contenido || []));
-                console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE.");
-            }
-        });
-
-        if (typeof render === 'function') render();
-    } catch (error) {
-        console.error("❌ Error en descargarDatosNube:", error);
-    }
-}
-
-// TODO LO QUE BUSCA BOTONES VA AQUÍ ADENTRO:
-document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. Botón de Login
-    const btnLogin = document.getElementById("btnLogin");
-    if (btnLogin) {
-        btnLogin.addEventListener("click", async () => {
-            if (login(document.getElementById("loginUsuario").value, document.getElementById("loginPassword").value)) {
-                await descargarDatosNube(); 
-                document.getElementById("loginError").classList.add("hidden");
-                console.log("🚀 Entrando con datos sincronizados.");
-            } else {
-                document.getElementById("loginError").classList.remove("hidden");
-                document.getElementById("loginError").textContent = "Usuario o contraseña incorrectos";
-            }
-        });
-    }
-
-    // 2. Botones de "Mostrar Contraseña" (Ojos)
-    const toggles = [
-        { id: "toggleLoginPassword", input: "loginPassword" },
-        { id: "toggleNuevaPassword", input: "nuevaPassword" },
-        { id: "toggleConfirmarPassword", input: "confirmarPassword" }
-    ];
-
-    toggles.forEach(t => {
-        const btn = document.getElementById(t.id);
-        if (btn) {
-            btn.addEventListener("click", () => togglePasswordVisibility(t.input, t.id));
-        }
-    });
-});
-
-setTimeout(descargarDatosNube, 2000);
   </script>
 </body>
 </html>
