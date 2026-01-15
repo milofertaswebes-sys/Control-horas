@@ -306,8 +306,8 @@
 window.query = query;
 window.orderBy = orderBy;
 
-
-// 1. PRIMERO DEFINIMOS LA FUNCIÓN (Para que el botón la encuentre)
+// --- BLOQUE ÚNICO: FUNCIÓN + BOTÓN LOGIN (CORREGIDO) ---
+        
         async function descargarDatosNube() {
             try {
                 console.log("🔄 Iniciando sincronización profunda...");
@@ -318,8 +318,7 @@ window.orderBy = orderBy;
                     return;
                 }
 
-                // Traemos los últimos 10 documentos para asegurar que pillamos trabajadores y registros
-                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"), limit(10));
+                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 querySnapshot.forEach((doc) => {
@@ -334,7 +333,6 @@ window.orderBy = orderBy;
                     }
                 });
 
-                // Dibujamos la tabla con los datos frescos
                 if (typeof render === 'function') render();
                 
             } catch (error) {
@@ -342,7 +340,6 @@ window.orderBy = orderBy;
             }
         }
 
-        // 2. LUEGO EL EVENTO DEL BOTÓN DE LOGIN
         document.getElementById("btnLogin").addEventListener("click", async () => {
             const usuario = document.getElementById("loginUsuario").value;
             const password = document.getElementById("loginPassword").value;
@@ -350,10 +347,7 @@ window.orderBy = orderBy;
             
             if (login(usuario, password)) {
                 console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
-                
-                // Esperamos a que la descarga termine antes de entrar
                 await descargarDatosNube(); 
-                
                 errorDiv.classList.add("hidden");
                 console.log("🚀 Sincronización completada. Entrando...");
             } else {
@@ -362,7 +356,6 @@ window.orderBy = orderBy;
             }
         });
 
-        // 3. EJECUCIÓN AUTOMÁTICA AL CARGAR LA PÁGINA (OPCIONAL)
         setTimeout(() => {
             descargarDatosNube();
         }, 2000);
@@ -370,10 +363,8 @@ window.orderBy = orderBy;
     </script>
 </head>
 <body class="p-4">
-  <!-- Barra de confirmaciones superior -->
   <div id="top-banner" class="top-banner" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
-  <!-- Login -->
   <div id="loginContainer" class="login-container">
     <div class="card p-8 max-w-md w-full">
       <h2 class="text-2xl font-bold text-center mb-6">🔐 Acceso al Sistema</h2>
@@ -399,7 +390,6 @@ window.orderBy = orderBy;
     </div>
   </div>
 
-  <!-- Modal para registro manual -->
   <div id="modalRegistroManual" class="modal">
     <div class="modal-content p-6">
       <div class="flex justify-between items-center mb-4">
@@ -436,52 +426,6 @@ window.orderBy = orderBy;
       </div>
     </div>
   </div>
-
-  <!-- Modal para cambio de contraseña -->
-  <div id="modalCambioPass" class="modal">
-    <div class="modal-content p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">🔑 Cambiar Contraseña</h3>
-        <button id="cerrarModalPass" class="text-2xl">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <label class="block">
-          <span class="text-sm font-medium">Usuario</span>
-          <select id="selectUsuarioPass" class="w-full mt-1">
-            <option value="admin">admin</option>
-            <option value="usuario">usuario</option>
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Nueva Contraseña</span>
-          <div class="password-container">
-            <input type="password" id="nuevaPassword" class="w-full mt-1" placeholder="Nueva contraseña" />
-            <span class="password-toggle" id="toggleNuevaPassword">
-              <i class="fas fa-eye"></i>
-            </span>
-          </div>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Confirmar Contraseña</span>
-          <div class="password-container">
-            <input type="password" id="confirmarPassword" class="w-full mt-1" placeholder="Confirmar contraseña" />
-            <span class="password-toggle" id="toggleConfirmarPassword">
-              <i class="fas fa-eye"></i>
-            </span>
-          </div>
-        </label>
-        <div class="flex gap-3 pt-4">
-          <button id="btnGuardarPass" class="btn btn-green flex-1">
-            <i class="fas fa-save mr-2"></i>Guardar
-          </button>
-          <button id="btnCancelarPass" class="btn btn-gray flex-1">
-            <i class="fas fa-times mr-2"></i>Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal para editar registro -->
   <div id="modalEditarRegistro" class="modal">
     <div class="modal-content p-6">
