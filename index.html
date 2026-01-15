@@ -310,8 +310,13 @@ window.orderBy = orderBy;
 // FUNCIÓN ÚNICA PARA DESCARGAR DATOS AL INICIAR
         async function descargarDatosNube() {
             try {
-                // Consultamos la nube buscando lo más reciente por timestamp
-                const q = query(collection(db, "registros_v2026"), orderBy("timestamp", "desc"));
+                console.log("🔄 Sincronizando datos con la nube...");
+                
+                // CORRECCIÓN: Usamos window.dbCloud para asegurar la conexión
+                const baseDatos = window.dbCloud || db; 
+                
+                // Consultamos la nube buscando en la colección correcta
+                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 let registrosNube = [];
@@ -320,20 +325,20 @@ window.orderBy = orderBy;
                 });
 
                 if (registrosNube.length > 0) {
-                    // BUSCAMOS SOLO EL REGISTRO DE TRABAJADORES (Filtro de seguridad)
+                    // Buscamos el registro más reciente que sea de tipo 'trabajadores'
                     const copiaValida = registrosNube.find(r => r.tipo_dato === 'trabajadores');
 
                     if (copiaValida) {
                         const datosLimpios = copiaValida.contenido || []; 
                         localStorage.setItem('trabajadores', JSON.stringify(datosLimpios));
-                        console.log("✅ Datos de trabajadores cargados con éxito.");
+                        console.log("✅ Datos de trabajadores cargados con éxito:", datosLimpios);
+                        
+                        // Forzamos la actualización de la tabla en pantalla
+                        if (typeof render === 'function') {
+                            render();
+                        }
                     } else {
-                        console.log("⚠️ No se encontraron trabajadores válidos en la nube.");
-                    }
-
-                    // Refrescamos la tabla visualmente si la función render existe
-                    if (typeof render === 'function') {
-                        render();
+                        console.log("⚠️ No se encontraron documentos con la etiqueta 'trabajadores'.");
                     }
                 }
             } catch (error) {
