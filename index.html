@@ -307,41 +307,28 @@ window.query = query;
 window.orderBy = orderBy;
 
 
-// --- FUNCIÓN ÚNICA Y DEFINITIVA DE SINCRONIZACIÓN ---
-        async function descargarDatosNube() {
-            try {
-                console.log("🔄 Sincronizando datos con la nube...");
-                const baseDatos = window.dbCloud || db; 
-                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                let registrosNube = [];
-                querySnapshot.forEach((doc) => { 
-                    registrosNube.push(doc.data()); 
-                });
-
-                if (registrosNube.length > 0) {
-                    // 1. Sincronizar Trabajadores
-                    const cTrabajadores = registrosNube.find(r => r.tipo_dato === 'trabajadores');
-                    if (cTrabajadores) {
-                        localStorage.setItem('trabajadores', JSON.stringify(cTrabajadores.contenido || []));
-                        console.log("✅ Lista de trabajadores actualizada.");
-                    }
-
-                    // 2. Sincronizar Horas (Clave para que el PC 1 vea lo que hizo el PC 2)
-                    const cHoras = registrosNube.find(r => r.tipo_dato === 'registros');
-                    if (cHoras) {
-                        localStorage.setItem('registros_v2026', JSON.stringify(cHoras.contenido || []));
-                        console.log("✅ Horas y marcajes actualizados desde la nube.");
-                    }
-
-                    // Refrescamos la tabla visualmente
-                    if (typeof render === 'function') render();
-                }
-            } catch (error) {
-                console.error("❌ Error sincronizando:", error);
-            }
+// Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
+      document.getElementById("btnLogin").addEventListener("click", async () => {
+        const usuario = document.getElementById("loginUsuario").value;
+        const password = document.getElementById("loginPassword").value;
+        const errorDiv = document.getElementById("loginError");
+        
+        if (login(usuario, password)) {
+          console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
+          
+          // Obligamos al programa a esperar a que los datos bajen
+          await descargarDatosNube(); 
+          
+          // Una vez bajados, volvemos a renderizar por si acaso
+          if (typeof render === 'function') render();
+          
+          errorDiv.classList.add("hidden");
+          console.log("🚀 Sincronización completada al iniciar sesión.");
+        } else {
+          errorDiv.textContent = "Usuario o contraseña incorrectos";
+          errorDiv.classList.remove("hidden");
         }
+      });
 
         // --- EJECUCIÓN AUTOMÁTICA AL ABRIR ---
         setTimeout(() => {
