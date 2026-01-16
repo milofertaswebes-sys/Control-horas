@@ -308,43 +308,68 @@ window.orderBy = orderBy;
 
 // --- BLOQUE ÚNICO: FUNCIÓN + BOTÓN LOGIN (CORREGIDO) ---
         
-        async function descargarDatosNube() {
-            try {
-                console.log("🔄 Iniciando sincronización profunda...");
-                const baseDatos = window.dbCloud || db; 
-                
-                if (!baseDatos) {
-                    console.error("❌ Error: Base de datos no inicializada.");
-                    return;
-                }
-
-                const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.tipo_dato === 'trabajadores') {
-                        localStorage.setItem('trabajadores', JSON.stringify(data.contenido || []));
-                        console.log("✅ Trabajadores actualizados.");
-                    }
-                    if (data.tipo_dato === 'registros') {
-                        localStorage.setItem('registros_v2026', JSON.stringify(data.contenido || []));
-                        console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE.");
-                    }
-                });
-
-                if (typeof render === 'function') render();
-                
-            } catch (error) {
-                console.error("❌ Error en descargarDatosNube:", error);
-            }
+async function descargarDatosNube() {
+    try {
+        console.log("🔄 Iniciando sincronización profunda...");
+        const baseDatos = window.dbCloud || db; 
+        
+        if (!baseDatos) {
+            console.error("❌ Error: Base de datos no inicializada.");
+            return;
         }
 
-        setTimeout(() => {
-            descargarDatosNube();
-        }, 2000);
+        const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            console.log("📦 Analizando en nube:", data.tipo_dato); 
 
-    </script>
+            // 1. Sincronizar Trabajadores
+            if (data.tipo_dato === 'trabajadores') {
+                const listaTrabajadores = data.contenido || [];
+                localStorage.setItem('trabajadores', JSON.stringify(listaTrabajadores));
+                
+                // Forzamos actualización de la variable global si existe
+                if (typeof trabajadores !== 'undefined') trabajadores = listaTrabajadores;
+                
+                console.log("✅ Trabajadores actualizados.");
+            }
+
+            // 2. Sincronizar Horas (Registros)
+            // Aceptamos tanto 'registros' como 'registros_v2026' por seguridad
+            if (data.tipo_dato === 'registros' || data.tipo_dato === 'registros_v2026') {
+                const listaRegistros = data.contenido || [];
+                
+                // Guardamos en el disco del navegador
+                localStorage.setItem('registros_v2026', JSON.stringify(listaRegistros));
+                
+                // ACTUALIZACIÓN CRÍTICA: Forzamos la variable que usa la tabla
+                if (typeof registros !== 'undefined') {
+                    registros = listaRegistros;
+                }
+                
+                console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE. Total:", listaRegistros.length);
+            }
+        });
+
+        // 3. Redibujar la interfaz
+        if (typeof render === 'function') {
+            console.log("📺 Ejecutando render() para mostrar cambios...");
+            render();
+        }
+        
+    } catch (error) {
+        console.error("❌ Error en descargarDatosNube:", error);
+    }
+}
+
+// --- INICIO AUTOMÁTICO ---
+setTimeout(() => {
+    descargarDatosNube();
+}, 2000);
+
+</script>
 </head>
 <body class="p-4">
   <div id="top-banner" class="top-banner" role="status" aria-live="polite" aria-atomic="true" hidden></div>
@@ -1456,107 +1481,158 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
-      // Login - VERSIÓN REFORZADA (ESPERA A LA NUBE)
-      document.getElementById("btnLogin").addEventListener("click", async () => {
-        const usuario = document.getElementById("loginUsuario").value;
-        const password = document.getElementById("loginPassword").value;
-        const errorDiv = document.getElementById("loginError");
-        
-        if (login(usuario, password)) {
-          console.log("🔐 Login correcto. Trayendo datos frescos de la nube...");
-          
-          // Obligamos al programa a esperar a que los datos bajen
-          await descargarDatosNube(); 
-          
-          // Una vez bajados, volvemos a renderizar por si acaso
-          if (typeof refreshUI === 'function') refreshUI();
-          
-          errorDiv.classList.add("hidden");
-          console.log("🚀 Sincronización completada al iniciar sesión.");
-        } else {
-          errorDiv.textContent = "Usuario o contraseña incorrectos";
-          errorDiv.classList.remove("hidden");
-        }
-      });
+ // --- GESTIÓN INTEGRAL: LOGIN, REGISTROS Y MODALES (CORREGIDO) ---
 
-      // Logout
-      document.getElementById("btnLogout").addEventListener("click", logout);
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. GESTIÓN DEL LOGIN (CON CLONACIÓN PARA LIMPIAR EVENTOS)
+    const btnLogin = document.getElementById("btnLogin");
+    if (btnLogin) {
+        btnLogin.replaceWith(btnLogin.cloneNode(true));
+        const nuevoBtnLogin = document.getElementById("btnLogin");
 
-      // Toggle password visibility
-      document.getElementById("toggleLoginPassword").addEventListener("click", () => {
-        togglePasswordVisibility("loginPassword", "toggleLoginPassword");
-      });
+        nuevoBtnLogin.addEventListener("click", async () => {
+            const usuario = document.getElementById("loginUsuario").value;
+            const password = document.getElementById("loginPassword").value;
+            const errorDiv = document.getElementById("loginError");
+            const loginContainer = document.getElementById("loginContainer");
+            
+            if (typeof login === 'function' && login(usuario, password)) {
+                console.log("🔐 Login correcto. Sincronizando datos del PC 2...");
+                
+                // OBLIGAMOS a descargar los datos antes de mostrar la tabla
+                if (typeof descargarDatosNube === 'function') {
+                    await descargarDatosNube(); 
+                }
+                
+                if (loginContainer) loginContainer.classList.add("hidden");
+                if (errorDiv) errorDiv.classList.add("hidden");
+                console.log("🚀 Sistema listo y actualizado.");
+            } else {
+                if (errorDiv) {
+                    errorDiv.textContent = "Usuario o contraseña incorrectos";
+                    errorDiv.classList.remove("hidden");
+                }
+            }
+        });
+    }
 
-      // Alta
-      document.getElementById("btnAlta").addEventListener("click", () => {
-        const nombre = document.getElementById("inputNombre").value;
-        const dni = document.getElementById("inputDNI").value;
-        altaTrabajador(nombre, dni);
-        document.getElementById("inputNombre").value = "";
-        document.getElementById("inputDNI").value = "";
-      });
+    // 2. SESIÓN Y VISIBILIDAD
+    const btnLogout = document.getElementById("btnLogout");
+    if (btnLogout) btnLogout.addEventListener("click", logout);
 
-      // Baja
-      document.getElementById("btnBaja").addEventListener("click", () => {
-        const valor = document.getElementById("inputBaja").value;
-        const tipo = document.querySelector('input[name="bajaTipo"]:checked').value;
-        bajaTrabajador(valor, tipo);
-        document.getElementById("inputBaja").value = "";
-      });
+    const togglePass = document.getElementById("toggleLoginPassword");
+    if (togglePass) {
+        togglePass.addEventListener("click", () => {
+            if (typeof togglePasswordVisibility === 'function') {
+                togglePasswordVisibility("loginPassword", "toggleLoginPassword");
+            }
+        });
+    }
 
-      // Registro
-      document.getElementById("btnRegistro").addEventListener("click", () => {
-        const valor = document.getElementById("inputRegistro").value;
-        const tipo = document.querySelector('input[name="regTipo"]:checked').value;
-        registrarEntradaSalida(valor, tipo);
-        document.getElementById("inputRegistro").value = "";
-      });
+    // 3. ALTA / BAJA DE TRABAJADORES
+    const btnAlta = document.getElementById("btnAlta");
+    if (btnAlta) {
+        btnAlta.addEventListener("click", () => {
+            const nombre = document.getElementById("inputNombre").value;
+            const dni = document.getElementById("inputDNI").value;
+            if (typeof altaTrabajador === 'function') altaTrabajador(nombre, dni);
+            document.getElementById("inputNombre").value = "";
+            document.getElementById("inputDNI").value = "";
+        });
+    }
 
-      // Enter en inputs
-      document.getElementById("inputRegistro").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          document.getElementById("btnRegistro").click();
-        }
-      });
+    const btnBaja = document.getElementById("btnBaja");
+    if (btnBaja) {
+        btnBaja.addEventListener("click", () => {
+            const valor = document.getElementById("inputBaja").value;
+            const radioBaja = document.querySelector('input[name="bajaTipo"]:checked');
+            if (radioBaja && typeof bajaTrabajador === 'function') {
+                bajaTrabajador(valor, radioBaja.value);
+            }
+            document.getElementById("inputBaja").value = "";
+        });
+    }
 
-      // Exportaciones
-      document.getElementById("btnExportar").addEventListener("click", exportCSV);
-      document.getElementById("btnExportarExcel").addEventListener("click", exportExcel);
-      document.getElementById("btnExportarPDF").addEventListener("click", exportPDF);
-      document.getElementById("btnExportarPDFResumen").addEventListener("click", exportPDFResumen);
+    // 4. REGISTRO DE ENTRADAS/SALIDAS
+    const btnRegistro = document.getElementById("btnRegistro");
+    const inputRegistro = document.getElementById("inputRegistro");
+    if (btnRegistro) {
+        btnRegistro.addEventListener("click", () => {
+            const valor = inputRegistro.value;
+            const radioReg = document.querySelector('input[name="regTipo"]:checked');
+            if (radioReg && typeof registrarEntradaSalida === 'function') {
+                registrarEntradaSalida(valor, radioReg.value);
+            }
+            inputRegistro.value = "";
+        });
+    }
+    if (inputRegistro) {
+        inputRegistro.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") btnRegistro.click();
+        });
+    }
 
-      // Filtros
-      document.getElementById("selectorTrabajador").addEventListener("change", renderTabla);
-      document.getElementById("mesSeleccionado").addEventListener("change", renderTabla);
-      document.getElementById("fDesde").addEventListener("change", renderTabla);
-      document.getElementById("fHasta").addEventListener("change", renderTabla);
+    // 5. EXPORTACIONES
+    const btnExportar = document.getElementById("btnExportar");
+    if (btnExportar) btnExportar.addEventListener("click", exportCSV);
 
-      // Registro manual
-      document.getElementById("btnRegistroManual").addEventListener("click", abrirModalRegistroManual);
-      document.getElementById("cerrarModal").addEventListener("click", cerrarModalRegistroManual);
-      document.getElementById("btnCancelarManual").addEventListener("click", cerrarModalRegistroManual);
-      document.getElementById("btnGuardarManual").addEventListener("click", guardarRegistroManual);
+    const btnExportarExcel = document.getElementById("btnExportarExcel");
+    if (btnExportarExcel) btnExportarExcel.addEventListener("click", exportExcel);
 
-      // Editar registro
-      document.getElementById("cerrarModalEditar").addEventListener("click", cerrarModalEditarRegistro);
-      document.getElementById("btnCancelarEditar").addEventListener("click", cerrarModalEditarRegistro);
-      document.getElementById("btnGuardarEditar").addEventListener("click", guardarEditarRegistro);
+    const btnExportarPDF = document.getElementById("btnExportarPDF");
+    if (btnExportarPDF) btnExportarPDF.addEventListener("click", exportPDF);
 
-      // Cerrar modales al hacer clic fuera
-      window.addEventListener("click", (e) => {
+    const btnExportarPDFResumen = document.getElementById("btnExportarPDFResumen");
+    if (btnExportarPDFResumen) btnExportarPDFResumen.addEventListener("click", exportPDFResumen);
+
+    // 6. FILTROS DE TABLA
+    const idsFiltros = ["selectorTrabajador", "mesSeleccionado", "fDesde", "fHasta"];
+    idsFiltros.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", renderTabla);
+    });
+
+    // 7. MODAL REGISTRO MANUAL
+    const btnRegManual = document.getElementById("btnRegistroManual");
+    if (btnRegManual) btnRegManual.addEventListener("click", abrirModalRegistroManual);
+
+    const btnCerrarM = document.getElementById("cerrarModal");
+    if (btnCerrarM) btnCerrarM.addEventListener("click", cerrarModalRegistroManual);
+
+    const btnCancManual = document.getElementById("btnCancelarManual");
+    if (btnCancManual) btnCancManual.addEventListener("click", cerrarModalRegistroManual);
+
+    const btnGuardManual = document.getElementById("btnGuardarManual");
+    if (btnGuardManual) btnGuardManual.addEventListener("click", guardarRegistroManual);
+
+    // 8. MODAL EDITAR REGISTRO
+    const btnCerrarE = document.getElementById("cerrarModalEditar");
+    if (btnCerrarE) btnCerrarE.addEventListener("click", cerrarModalEditarRegistro);
+
+    const btnCancEdit = document.getElementById("btnCancelarEditar");
+    if (btnCancEdit) btnCancEdit.addEventListener("click", cerrarModalEditarRegistro);
+
+    const btnGuardEdit = document.getElementById("btnGuardarEditar");
+    if (btnGuardEdit) btnGuardEdit.addEventListener("click", guardarEditarRegistro);
+
+    // 9. CERRAR MODALES AL HACER CLIC FUERA
+    window.addEventListener("click", (e) => {
         const modalRegistro = document.getElementById("modalRegistroManual");
         const modalEditar = document.getElementById("modalEditarRegistro");
-        if (e.target === modalRegistro) {
-          cerrarModalRegistroManual();
+        if (e.target === modalRegistro && typeof cerrarModalRegistroManual === 'function') {
+            cerrarModalRegistroManual();
         }
-        if (e.target === modalEditar) {
-          cerrarModalEditarRegistro();
+        if (e.target === modalEditar && typeof cerrarModalEditarRegistro === 'function') {
+            cerrarModalEditarRegistro();
         }
-      });
-
-      // Inicializar UI
-      refreshUI();
     });
-  </script>
+
+    // INICIALIZACIÓN FINAL
+    if (typeof refreshUI === 'function') refreshUI();
+
+}); // <-- CIERRE CORRECTO DE DOMContentLoaded
+
+</script>
 </body>
 </html>
