@@ -331,47 +331,44 @@
 	  window.getDocs = getDocs;
 window.query = query;
 window.orderBy = orderBy;
-// SUSTITUIR DESDE LA LÍNEA 337 HASTA EL CIERRE DE LA FUNCIÓN
-
 async function descargarDatosNube() {
     console.log("📡 [PC 1] Iniciando descarga profunda de datos...");
 
     try {
-        // 1. LEER TRABAJADORES (Carpeta compartida 'trabajadores_v2026')
+        // --- ESPÍA DE TRABAJADORES ---
         if (typeof leerDatosNube === 'function') {
+            console.log("🔍 Buscando en nube: trabajadores_v2026..."); // Chivato 1
             const trabajadoresNube = await leerDatosNube('trabajadores_v2026');
             
+            // AQUÍ ESTÁ LA CLAVE: Vamos a ver qué trae exactamente
+            console.log("📦 RESPUESTA CRUDA TRABAJADORES:", trabajadoresNube); 
+
             if (trabajadoresNube && Array.isArray(trabajadoresNube) && trabajadoresNube.length > 0) {
-                console.log(`✅ Trabajadores recibidos: ${trabajadoresNube.length}`);
-                
-                // Actualizamos la variable local y guardamos
+                console.log(`✅ ¡ÉXITO! Trabajadores recibidos: ${trabajadoresNube.length}`);
                 trabajadores = trabajadoresNube;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                
-                // Actualizamos el selector visualmente
                 if (typeof actualizarSelector === 'function') actualizarSelector();
             } else {
-                console.warn("⚠️ La nube devolvió 0 trabajadores o carpeta vacía.");
+                console.warn("⚠️ La nube ha devuelto datos vacíos o incorrectos para trabajadores.");
             }
         }
 
-        // 2. LEER FICHAJES (Carpeta compartida 'registros_v2026')
+        // --- ESPÍA DE REGISTROS ---
         if (typeof leerDatosNube === 'function') {
+            console.log("🔍 Buscando en nube: registros_v2026..."); // Chivato 2
             const registrosNube = await leerDatosNube('registros_v2026');
             
+            console.log("📦 RESPUESTA CRUDA REGISTROS:", registrosNube); 
+
             if (registrosNube && Array.isArray(registrosNube) && registrosNube.length > 0) {
-                console.log(`✅ Fichajes recibidos: ${registrosNube.length}`);
-                
-                // Actualizamos la variable local 'fichajes' y guardamos
+                console.log(`✅ ¡ÉXITO! Fichajes recibidos: ${registrosNube.length}`);
                 fichajes = registrosNube; 
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
             } else {
-                console.warn("⚠️ La nube devolvió 0 registros.");
+                console.warn("⚠️ La nube ha devuelto datos vacíos o incorrectos para registros.");
             }
         }
 
-        // 3. PASO CRÍTICO: PINTAR LA TABLA
-        // Si no hacemos esto, los datos están en memoria pero no se ven
         console.log("🎨 Actualizando tabla en pantalla...");
         if (typeof renderTabla === 'function') renderTabla();
         if (typeof refreshUI === 'function') refreshUI();
