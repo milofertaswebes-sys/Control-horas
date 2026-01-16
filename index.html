@@ -334,58 +334,52 @@ window.orderBy = orderBy;
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga (Método de Objeto)...");
+    console.log("📡 [PC 1] Intentando descarga profunda...");
 
     try {
-        // Buscamos las funciones dentro del objeto global de Firebase
-        const f = window.FirebaseFirestore || (window.firebase ? window.firebase.firestore : null);
-        
-        // Intentamos obtener el documento de trabajadores
-        // Usamos la ruta directa que suele funcionar en estos entornos
-        const docRefT = doc(db, "trabajadores_v2026", "unico");
-        const docSnapT = await getDoc(docRefT);
+        // Intentamos capturar las funciones de Firebase de cualquier sitio posible
+        const fDoc = typeof doc !== 'undefined' ? doc : (window.doc || null);
+        const fGetDoc = typeof getDoc !== 'undefined' ? getDoc : (window.getDoc || null);
 
-        if (docSnapT.exists()) {
-            const dataT = docSnapT.data().data;
+        if (!fDoc || !fGetDoc) {
+            console.warn("⚠️ Las herramientas (doc/getDoc) no están accesibles en esta línea.");
+            console.log("Intentando usar el motor db directamente...");
+            // Plan de rescate: si no están definidas, el PC 1 no podrá leer.
+            return;
+        }
+
+        // 1. DESCARGAR TRABAJADORES
+        const refT = fDoc(db, 'trabajadores_v2026', 'unico');
+        const snapT = await fGetDoc(refT);
+        
+        if (snapT.exists()) {
+            const dataT = snapT.data().data;
             if (Array.isArray(dataT)) {
                 trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores bajados.`);
+                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores recuperados.`);
             }
         }
 
-        const docRefR = doc(db, "registros_v2026", "unico");
-        const docSnapR = await getDoc(docRefR);
-
-        if (docSnapR.exists()) {
-            const dataR = docSnapR.data().data;
+        // 2. DESCARGAR REGISTROS
+        const refR = fDoc(db, 'registros_v2026', 'unico');
+        const snapR = await fGetDoc(refR);
+        
+        if (snapR.exists()) {
+            const dataR = snapR.data().data;
             if (Array.isArray(dataR)) {
                 fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
-                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes bajados.`);
+                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes recuperados.`);
             }
         }
 
+        // 3. REFRESCAR PANTALLA
         if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
 
     } catch (error) {
-        console.error("❌ Error en descarga:", error.message);
-        
-        // --- ÚLTIMO RECURSO: BÚSQUEDA MANUAL ---
-        console.log("Intentando acceso mediante instancia...");
-        try {
-            // Si el error es que doc no existe, intentamos usar el objeto db directamente
-            const snapT = await db._delegate? getDoc(doc(db, "trabajadores_v2026", "unico")) : null;
-            if (snapT && snapT.exists()) {
-                 trabajadores = snapT.data().data;
-                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                 actualizarSelector();
-                 renderTabla();
-            }
-        } catch (e3) {
-            console.error("Error crítico: No se encuentran las funciones de lectura.");
-        }
+        console.error("❌ Error en descargarDatosNube:", error);
     }
 }
 	  
