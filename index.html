@@ -1378,17 +1378,25 @@ async function bajaTrabajador(valor, tipo) {
     }
 
 
-	  
-   function renderTabla() {
+function renderTabla() {
       console.log("🎨 Dibujando tabla de registros...");
       const tbody = document.querySelector("#tablaHoras tbody");
       if (!tbody) return;
       
       tbody.innerHTML = "";
-      const { datos } = obtenerDatosFiltrados();
-      const tById = new Map(trabajadores.map(t => [t.id, t]));
+      
+      // Intentamos obtener los datos. Si 'obtenerDatosFiltrados' falla o está vacío, usamos la variable global.
+      const filtrado = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
+      let datosAMostrar = filtrado.datos || [];
+      
+      // Si no hay datos en el filtro, intentamos usar la variable global fichajes
+      if (datosAMostrar.length === 0 && typeof fichajes !== 'undefined') {
+          datosAMostrar = fichajes;
+      }
 
-      if (!datos || !datos.length) {
+      const tById = new Map((typeof trabajadores !== 'undefined' ? trabajadores : []).map(t => [t.id, t]));
+
+      if (!datosAMostrar.length) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No hay registros</td></tr>`;
         const totalEl = document.getElementById("totalHoras");
         if (totalEl) totalEl.textContent = "0.00";
@@ -1397,15 +1405,15 @@ async function bajaTrabajador(valor, tipo) {
 
       let total = 0;
 
-      // --- ORDENACIÓN CORREGIDA (Línea 1393 aprox) ---
-      // Usamos una comparación segura que no falla si faltan datos
-      datos.sort((a, b) => {
-        const fechaA = (a.fecha || "") + (a.entradaISO || "");
-        const fechaB = (b.fecha || "") + (b.entradaISO || "");
-        return fechaA.localeCompare(fechaB);
+      // --- ORDENACIÓN ROBUSTA (Corrigiendo el error localeCompare) ---
+      datosAMostrar.sort((a, b) => {
+        // Aseguramos que siempre sean cadenas de texto (si es nulo, usa "")
+        const strA = (a.fecha || "") + (a.entradaISO || "");
+        const strB = (b.fecha || "") + (b.entradaISO || "");
+        return strA.localeCompare(strB);
       });
 
-      datos.forEach(r => {
+      datosAMostrar.forEach(r => {
         total += r.horas || 0;
         const trabajador = tById.get(r.trabajadorId) || {};
         const tr = document.createElement("tr");
@@ -1416,7 +1424,7 @@ async function bajaTrabajador(valor, tipo) {
           <td>${r.salidaISO ? formatTimeForRender(r.salidaISO) : ""}</td>
           <td>${(r.horas || 0).toFixed(2)}</td>
           <td>
-            ${usuarioActual && usuarioActual.rol === "admin" ? 
+            ${(typeof usuarioActual !== 'undefined' && usuarioActual && usuarioActual.rol === "admin") ? 
               `<button class="action-btn btn-blue" onclick="abrirModalEditarRegistro('${r.id}')">
                 <i class="fas fa-edit"></i>
               </button>` : 
@@ -1429,16 +1437,16 @@ async function bajaTrabajador(valor, tipo) {
 
       const totalEl = document.getElementById("totalHoras");
       if (totalEl) totalEl.textContent = total.toFixed(2);
-      console.log("✨ Tabla renderizada correctamente.");
+      console.log("✨ ¡Tabla pintada con éxito!");
     }
 
     /** CSV */
     function exportCSV() {
-      const { datos, trabajadorId, mes, desde, hasta } = obtenerDatosFiltrados();
+      const { datos } = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
       const header = ["Trabajador Nº","Nombre","DNI","Fecha","Entrada","Salida","Horas"];
       const lines = [header.join(";")];
 
-      const tById = new Map(trabajadores.map(t => [t.id, t]));
+      const tById = new Map((typeof trabajadores !== 'undefined' ? trabajadores : []).map(t => [t.id, t]));
       let total = 0;
       datos.forEach(r => {
         const t = tById.get(r.trabajadorId) || {};
@@ -1447,17 +1455,16 @@ async function bajaTrabajador(valor, tipo) {
           t.numero ?? "",
           t.nombre ?? "",
           t.dni ?? "",
-          r.fecha,
-          r.entradaISO,
-          r.salidaISO,
+          r.fecha || "",
+          r.entradaISO || "",
+          r.salidaISO || "",
           (r.horas||0).toFixed(2)
         ].join(";"));
       });
       lines.push(["","","","TOTAL","","", total.toFixed(2)].join(";"));
 
-      const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
-      downloadBlob(`horas_${filtro}.csv`, "text/csv;charset=utf-8", lines.join("\n"));
-      showBanner("📄 CSV exportado.", "success");
+      downloadBlob(`exportacion_horas.csv`, "text/csv;charset=utf-8", lines.join("\n"));
+      if (typeof showBanner === 'function') showBanner("📄 CSV exportado.", "success");
     }
 
     /** Excel simple (HTML table -> abre en Excel) */
