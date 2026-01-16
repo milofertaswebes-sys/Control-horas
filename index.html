@@ -331,62 +331,53 @@
 	  window.getDocs = getDocs;
 window.query = query;
 window.orderBy = orderBy;
+// SUSTITUIR DESDE LA LÍNEA 337 HASTA EL CIERRE DE LA FUNCIÓN
 
-// --- BLOQUE ÚNICO: FUNCIÓN + BOTÓN LOGIN (CORREGIDO) ---
-        
 async function descargarDatosNube() {
+    console.log("📡 [PC 1] Iniciando descarga profunda de datos...");
+
     try {
-        console.log("🔄 Iniciando sincronización profunda...");
-        const baseDatos = window.dbCloud || db; 
-        
-        if (!baseDatos) {
-            console.error("❌ Error: Base de datos no inicializada.");
-            return;
+        // 1. LEER TRABAJADORES (Carpeta compartida 'trabajadores_v2026')
+        if (typeof leerDatosNube === 'function') {
+            const trabajadoresNube = await leerDatosNube('trabajadores_v2026');
+            
+            if (trabajadoresNube && Array.isArray(trabajadoresNube) && trabajadoresNube.length > 0) {
+                console.log(`✅ Trabajadores recibidos: ${trabajadoresNube.length}`);
+                
+                // Actualizamos la variable local y guardamos
+                trabajadores = trabajadoresNube;
+                localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
+                
+                // Actualizamos el selector visualmente
+                if (typeof actualizarSelector === 'function') actualizarSelector();
+            } else {
+                console.warn("⚠️ La nube devolvió 0 trabajadores o carpeta vacía.");
+            }
         }
 
-        const q = query(collection(baseDatos, "registros_v2026"), orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            console.log("📦 Analizando en nube:", data.tipo_dato); 
-
-            // 1. Sincronizar Trabajadores
-            if (data.tipo_dato === 'trabajadores') {
-                const listaTrabajadores = data.contenido || [];
-                localStorage.setItem('trabajadores', JSON.stringify(listaTrabajadores));
+        // 2. LEER FICHAJES (Carpeta compartida 'registros_v2026')
+        if (typeof leerDatosNube === 'function') {
+            const registrosNube = await leerDatosNube('registros_v2026');
+            
+            if (registrosNube && Array.isArray(registrosNube) && registrosNube.length > 0) {
+                console.log(`✅ Fichajes recibidos: ${registrosNube.length}`);
                 
-                // Forzamos actualización de la variable global si existe
-                if (typeof trabajadores !== 'undefined') trabajadores = listaTrabajadores;
-                
-                console.log("✅ Trabajadores actualizados.");
+                // Actualizamos la variable local 'fichajes' y guardamos
+                fichajes = registrosNube; 
+                localStorage.setItem('fichajes', JSON.stringify(fichajes));
+            } else {
+                console.warn("⚠️ La nube devolvió 0 registros.");
             }
-
-            // 2. Sincronizar Horas (Registros)
-            // Aceptamos tanto 'registros' como 'registros_v2026' por seguridad
-            if (data.tipo_dato === 'registros' || data.tipo_dato === 'registros_v2026') {
-                const listaRegistros = data.contenido || [];
-                
-                // Guardamos en el disco del navegador
-                localStorage.setItem('registros_v2026', JSON.stringify(listaRegistros));
-                
-                // ACTUALIZACIÓN CRÍTICA: Forzamos la variable que usa la tabla
-                if (typeof registros !== 'undefined') {
-                    registros = listaRegistros;
-                }
-                
-                console.log("✅ HORAS ACTUALIZADAS DESDE LA NUBE. Total:", listaRegistros.length);
-            }
-        });
-
-        // 3. Redibujar la interfaz
-        if (typeof render === 'function') {
-            console.log("📺 Ejecutando render() para mostrar cambios...");
-            render();
         }
-        
+
+        // 3. PASO CRÍTICO: PINTAR LA TABLA
+        // Si no hacemos esto, los datos están en memoria pero no se ven
+        console.log("🎨 Actualizando tabla en pantalla...");
+        if (typeof renderTabla === 'function') renderTabla();
+        if (typeof refreshUI === 'function') refreshUI();
+
     } catch (error) {
-        console.error("❌ Error en descargarDatosNube:", error);
+        console.error("❌ Error grave en descargarDatosNube:", error);
     }
 }
 
