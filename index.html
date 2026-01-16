@@ -333,27 +333,17 @@ window.query = query;
 window.orderBy = orderBy;
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
-	  async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga (Versión Universal)...");
+	async function descargarDatosNube() {
+    console.log("📡 [PC 1] Iniciando descarga directa...");
 
     try {
-        // Importamos las herramientas de Firebase desde el objeto global
-        const { doc, getDoc } = window.firebase ? window.firebase.firestore : {};
-        
-        // Si no las encuentra ahí, las buscamos en el espacio global (v9 modular)
-        const getDocFunc = typeof getDoc === 'function' ? getDoc : (typeof window.getDoc === 'function' ? window.getDoc : null);
-        const docFunc = typeof doc === 'function' ? doc : (typeof window.doc === 'function' ? window.doc : null);
+        // 1. LEER TRABAJADORES
+        // Accedemos al documento 'unico' dentro de la colección 'trabajadores_v2026'
+        const docRefT = doc(db, "trabajadores_v2026", "unico");
+        const docSnapT = await getDoc(docRefT);
 
-        if (!getDocFunc || !docFunc) {
-            throw new Error("No se han encontrado las funciones 'getDoc' o 'doc' de Firebase.");
-        }
-
-        // 1. DESCARGAR TRABAJADORES
-        const refT = docFunc(db, 'trabajadores_v2026', 'unico');
-        const snapT = await getDocFunc(refT);
-        
-        if (snapT.exists()) {
-            const dataT = snapT.data().data;
+        if (docSnapT.exists()) {
+            const dataT = docSnapT.data().data;
             if (Array.isArray(dataT)) {
                 trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
@@ -361,12 +351,12 @@ window.orderBy = orderBy;
             }
         }
 
-        // 2. DESCARGAR REGISTROS (Fichajes)
-        const refR = docFunc(db, 'registros_v2026', 'unico');
-        const snapR = await getDocFunc(refR);
-        
-        if (snapR.exists()) {
-            const dataR = snapR.data().data;
+        // 2. LEER REGISTROS (HORAS)
+        const docRefR = doc(db, "registros_v2026", "unico");
+        const docSnapR = await getDoc(docRefR);
+
+        if (docSnapR.exists()) {
+            const dataR = docSnapR.data().data;
             if (Array.isArray(dataR)) {
                 fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
@@ -374,27 +364,15 @@ window.orderBy = orderBy;
             }
         }
 
-        // 3. REFRESCAR INTERFAZ
-        console.log("🎨 Actualizando vista...");
+        // 3. ACTUALIZAR PANTALLA
+        console.log("🎨 Actualizando tabla...");
         if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
-        if (typeof refreshUI === 'function') refreshUI();
 
     } catch (error) {
-        console.error("❌ Error en descargarDatosNube:", error.message);
-        console.log("Intentando método alternativo...");
-        // Si falla lo anterior, intentamos el método antiguo por si acaso
-        try {
-            const snapT = await db.collection('trabajadores_v2026').doc('unico').get();
-            if (snapT.exists) {
-                trabajadores = snapT.data().data;
-                localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                if (typeof actualizarSelector === 'function') actualizarSelector();
-                if (typeof renderTabla === 'function') renderTabla();
-            }
-        } catch (e2) {
-            console.error("Fallo total de lectura:", e2.message);
-        }
+        console.error("❌ Error en la descarga:", error);
+        // Si el error sigue siendo "doc is not defined", es que falta importar doc y getDoc arriba
+        console.log("Sugerencia: Revisa si arriba del todo tienes: import { doc, getDoc } ... ");
     }
 }
 // --- INICIO AUTOMÁTICO ---
