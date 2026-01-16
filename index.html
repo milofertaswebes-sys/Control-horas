@@ -1042,49 +1042,79 @@ try {
     /***************************************************
      * WORKERS
      ***************************************************/
-    function altaTrabajador(nombre, dni) {
-      console.log('[DEBUG altaTrabajador] nombre=', nombre, 'dni=', dni);
+   // --- FUNCIONES CORREGIDAS PARA ENVIAR AL PC 2 ---
 
-      if (!validarNombre(nombre)) {
+async function altaTrabajador(nombre, dni) {
+    console.log('[DEBUG altaTrabajador] nombre=', nombre, 'dni=', dni);
+
+    if (!validarNombre(nombre)) {
         showBanner("❌ El nombre no puede estar vacío.", "error");
         return;
-      }
-      if (!validarDNI(dni)) {
+    }
+    if (!validarDNI(dni)) {
         showBanner("❌ DNI/NIE no válido.", "error");
         return;
-      }
-      if (trabajadores.some(t => t.dni.toUpperCase() === String(dni).toUpperCase())) {
+    }
+    // Convertimos a String para evitar errores si el DNI es solo números
+    if (trabajadores.some(t => String(t.dni).toUpperCase() === String(dni).toUpperCase())) {
         showBanner("❌ Ya existe un trabajador con ese DNI/NIE.", "error");
         return;
-      }
-      const nextNumber = trabajadores.length ? Math.max(...trabajadores.map(t => t.numero)) + 1 : 1;
-      const nuevo = {
+    }
+
+    const nextNumber = trabajadores.length ? Math.max(...trabajadores.map(t => t.numero)) + 1 : 1;
+    
+    const nuevo = {
         id: cryptoRandomId(),
         numero: nextNumber,
         nombre: nombre.trim(),
         dni: String(dni).toUpperCase(),
         estado: "Activo"
-      };
-      trabajadores.push(nuevo);
-      guardarDatos();
-      actualizarSelector();
-      showBanner(`✅ Alta: ${nuevo.nombre} (nº ${nuevo.numero})`, "success");
+    };
+
+    trabajadores.push(nuevo);
+    
+    // 1. Guardamos en TU ordenador
+    guardarDatos(); 
+
+    // 2. ENVIAMOS AL PC 2 (ESTO ES LO QUE FALTABA)
+    if (typeof subirDatosNube === 'function') {
+        console.log("☁️ Subiendo nuevo trabajador a la nube...");
+        await subirDatosNube('trabajadores_v2026', trabajadores);
     }
 
-    function bajaTrabajador(valor, tipo) {
-      let trabajador;
-      if (tipo === "dni") {
-        trabajador = trabajadores.find(t => t.dni.toUpperCase() === String(valor).toUpperCase());
-      } else {
+    // 3. Actualizamos la pantalla
+    if (typeof actualizarSelector === 'function') actualizarSelector();
+    if (typeof renderTabla === 'function') renderTabla(); // Para refrescar si tienes lista visible
+    
+    showBanner(`✅ Alta: ${nuevo.nombre} (nº ${nuevo.numero})`, "success");
+}
+
+async function bajaTrabajador(valor, tipo) {
+    let trabajador;
+    if (tipo === "dni") {
+        trabajador = trabajadores.find(t => String(t.dni).toUpperCase() === String(valor).toUpperCase());
+    } else {
         trabajador = trabajadores.find(t => t.numero == valor);
-      }
-      if (!trabajador) { showBanner("❌ Trabajador no encontrado.", "error"); return; }
-      if (!confirm(`¿Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
-      trabajador.estado = "Baja";
-      guardarDatos();
-      actualizarSelector();
-      showBanner(`🛑 Baja: ${trabajador.nombre}`, "success");
     }
+
+    if (!trabajador) { showBanner("❌ Trabajador no encontrado.", "error"); return; }
+    if (!confirm(`¿Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
+
+    trabajador.estado = "Baja";
+    
+    // 1. Guardamos en TU ordenador
+    guardarDatos();
+
+    // 2. ENVIAMOS LA BAJA AL PC 2
+    if (typeof subirDatosNube === 'function') {
+        console.log("☁️ Sincronizando baja en la nube...");
+        await subirDatosNube('trabajadores_v2026', trabajadores);
+    }
+
+    if (typeof actualizarSelector === 'function') actualizarSelector();
+    
+    showBanner(`🛑 Baja: ${trabajador.nombre}`, "success");
+}
 
     /***************************************************
      * RECORDS
