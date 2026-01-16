@@ -331,30 +331,28 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, 
         window.collection = collection;
         window.getDocs = getDocs;
         window.query = query;
-        window.orderBy = orderBy;
-        
-        // --- ESTO ES LO QUE FALTABA PARA LA DESCARGA ---
+        window.orderBy = orderBy;	  
         window.doc = doc;
-        window.getDoc = getDoc;
+       window.getDoc = getDoc;
+        
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Intentando descarga profunda...");
+    console.log("📡 [PC 1] Iniciando descarga de datos desde la nube...");
 
     try {
-        // Intentamos capturar las funciones de Firebase de cualquier sitio posible
-        const fDoc = typeof doc !== 'undefined' ? doc : (window.doc || null);
-        const fGetDoc = typeof getDoc !== 'undefined' ? getDoc : (window.getDoc || null);
+        // Usamos las llaves que acabamos de poner en el window
+        const fDoc = window.doc;
+        const fGetDoc = window.getDoc;
+        const baseDatos = window.dbCloud || db;
 
         if (!fDoc || !fGetDoc) {
-            console.warn("⚠️ Las herramientas (doc/getDoc) no están accesibles en esta línea.");
-            console.log("Intentando usar el motor db directamente...");
-            // Plan de rescate: si no están definidas, el PC 1 no podrá leer.
+            console.error("❌ Las herramientas de lectura no están listas.");
             return;
         }
 
         // 1. DESCARGAR TRABAJADORES
-        const refT = fDoc(db, 'trabajadores_v2026', 'unico');
+        const refT = fDoc(baseDatos, 'trabajadores_v2026', 'unico');
         const snapT = await fGetDoc(refT);
         
         if (snapT.exists()) {
@@ -366,8 +364,8 @@ async function descargarDatosNube() {
             }
         }
 
-        // 2. DESCARGAR REGISTROS
-        const refR = fDoc(db, 'registros_v2026', 'unico');
+        // 2. DESCARGAR REGISTROS (Fichajes)
+        const refR = fDoc(baseDatos, 'registros_v2026', 'unico');
         const snapR = await fGetDoc(refR);
         
         if (snapR.exists()) {
@@ -379,12 +377,13 @@ async function descargarDatosNube() {
             }
         }
 
-        // 3. REFRESCAR PANTALLA
+        // 3. ACTUALIZAR LA PANTALLA PARA VER LOS NOMBRES
+        console.log("🎨 Dibujando datos en el PC 1...");
         if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
 
     } catch (error) {
-        console.error("❌ Error en descargarDatosNube:", error);
+        console.error("❌ Error en la descarga:", error);
     }
 }
 	  
