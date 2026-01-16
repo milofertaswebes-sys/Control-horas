@@ -338,49 +338,40 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, 
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga de datos desde la nube...");
+    console.log("📡 [PC 1] Descargando trabajadores y fichajes...");
 
     try {
-        // Usamos las llaves que acabamos de poner en el window
         const fDoc = window.doc;
         const fGetDoc = window.getDoc;
         const baseDatos = window.dbCloud || db;
 
-        if (!fDoc || !fGetDoc) {
-            console.error("❌ Las herramientas de lectura no están listas.");
-            return;
-        }
+        if (!fDoc || !fGetDoc) return;
 
         // 1. DESCARGAR TRABAJADORES
-        const refT = fDoc(baseDatos, 'trabajadores_v2026', 'unico');
-        const snapT = await fGetDoc(refT);
-        
+        const snapT = await fGetDoc(fDoc(baseDatos, 'trabajadores_v2026', 'unico'));
         if (snapT.exists()) {
-            const dataT = snapT.data().data;
-            if (Array.isArray(dataT)) {
-                trabajadores = dataT;
-                localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores recuperados.`);
-            }
+            trabajadores = snapT.data().data || [];
+            localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
+            console.log(`✅ ${trabajadores.length} trabajadores listos.`);
         }
 
         // 2. DESCARGAR REGISTROS (Fichajes)
-        const refR = fDoc(baseDatos, 'registros_v2026', 'unico');
-        const snapR = await fGetDoc(refR);
-        
+        const snapR = await fGetDoc(fDoc(baseDatos, 'registros_v2026', 'unico'));
         if (snapR.exists()) {
-            const dataR = snapR.data().data;
-            if (Array.isArray(dataR)) {
-                fichajes = dataR;
-                localStorage.setItem('fichajes', JSON.stringify(fichajes));
-                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes recuperados.`);
-            }
+            fichajes = snapR.data().data || [];
+            localStorage.setItem('fichajes', JSON.stringify(fichajes));
+            console.log(`✅ ${fichajes.length} fichajes recuperados.`);
         }
 
-        // 3. ACTUALIZAR LA PANTALLA PARA VER LOS NOMBRES
-        console.log("🎨 Dibujando datos en el PC 1...");
-        if (typeof actualizarSelector === 'function') actualizarSelector();
-        if (typeof renderTabla === 'function') renderTabla();
+        // 3. ¡FORZAR EL DIBUJO DE LA TABLA!
+        console.log("🎨 Dibujando tabla de registros...");
+        
+        // Esta es la parte clave:
+        if (typeof renderTabla === 'function') {
+            renderTabla(); 
+        } else if (typeof mostrarRegistros === 'function') {
+            mostrarRegistros();
+        }
 
     } catch (error) {
         console.error("❌ Error en la descarga:", error);
