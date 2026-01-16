@@ -1481,144 +1481,113 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
-// --- GESTIÓN INTEGRAL: LOGIN, REGISTROS Y MODALES (VERSIÓN ESTABLE) ---
+// --- BLOQUE FINAL DE CONTROL: LOGIN, REGISTROS Y MODALES ---
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("🚀 Sistema de eventos iniciado...");
+    console.log("✅ Sistema de control de interfaz cargado.");
 
-    // 1. GESTIÓN DEL LOGIN
+    // 1. LOGIN Y ACCESO
     const btnLogin = document.getElementById("btnLogin");
     if (btnLogin) {
-        // Usamos onclick directo para máxima compatibilidad
         btnLogin.onclick = async () => {
-            const usuarioInput = document.getElementById("loginUsuario");
-            const passwordInput = document.getElementById("loginPassword");
-            const errorDiv = document.getElementById("loginError");
-            const loginContainer = document.getElementById("loginContainer");
-
-            if (!usuarioInput || !passwordInput) return;
-
-            const usuario = usuarioInput.value;
-            const password = passwordInput.value;
-
-            if (typeof login === 'function' && login(usuario, password)) {
+            const userEl = document.getElementById("loginUsuario");
+            const passEl = document.getElementById("loginPassword");
+            
+            if (typeof login === 'function' && login(userEl.value, passEl.value)) {
                 console.log("🔐 Login correcto. Sincronizando datos...");
                 
-                // OBLIGAMOS a descargar los datos del PC 2 antes de entrar
+                // Descarga profunda para que el PC 1 vea lo del PC 2
                 if (typeof descargarDatosNube === 'function') {
                     await descargarDatosNube();
                 }
-
-                if (loginContainer) loginContainer.classList.add("hidden");
-                if (errorDiv) errorDiv.classList.add("hidden");
-                console.log("🚀 Sincronización completada. ¡Bienvenido!");
+                
+                document.getElementById("loginContainer").classList.add("hidden");
+                console.log("🚀 PC 1 actualizado y dentro.");
             } else {
-                if (errorDiv) {
-                    errorDiv.textContent = "Usuario o contraseña incorrectos";
-                    errorDiv.classList.remove("hidden");
-                }
+                alert("Usuario o contraseña incorrectos");
             }
         };
     }
 
-    // 2. SESIÓN Y VISIBILIDAD (EL OJO)
+    // 2. VER CONTRASEÑA (EL OJO)
+    const btnOjo = document.getElementById("toggleLoginPassword");
+    if (btnOjo) {
+        btnOjo.onclick = () => {
+            const passField = document.getElementById("loginPassword");
+            if (passField) {
+                passField.type = passField.type === "password" ? "text" : "password";
+            }
+        };
+    }
+
+    // 3. LOGOUT
     const btnLogout = document.getElementById("btnLogout");
-    if (btnLogout) btnLogout.onclick = () => { if (typeof logout === 'function') logout(); };
-
-    const togglePass = document.getElementById("toggleLoginPassword");
-    if (togglePass) {
-        togglePass.onclick = () => {
-            const field = document.getElementById("loginPassword");
-            if (field) {
-                field.type = field.type === "password" ? "text" : "password";
-            }
-        };
-    }
-
-    // 3. ALTA / BAJA DE TRABAJADORES
-    const btnAlta = document.getElementById("btnAlta");
-    if (btnAlta) {
-        btnAlta.onclick = () => {
-            const nombre = document.getElementById("inputNombre").value;
-            const dni = document.getElementById("inputDNI").value;
-            if (typeof altaTrabajador === 'function') altaTrabajador(nombre, dni);
-            document.getElementById("inputNombre").value = "";
-            document.getElementById("inputDNI").value = "";
-        };
-    }
-
-    const btnBaja = document.getElementById("btnBaja");
-    if (btnBaja) {
-        btnBaja.onclick = () => {
-            const valor = document.getElementById("inputBaja").value;
-            const radioBaja = document.querySelector('input[name="bajaTipo"]:checked');
-            if (radioBaja && typeof bajaTrabajador === 'function') {
-                bajaTrabajador(valor, radioBaja.value);
-            }
-            document.getElementById("inputBaja").value = "";
+    if (btnLogout) {
+        btnLogout.onclick = () => {
+            if (typeof logout === 'function') logout();
         };
     }
 
     // 4. REGISTRO DE ENTRADAS/SALIDAS
     const btnRegistro = document.getElementById("btnRegistro");
-    const inputRegistro = document.getElementById("inputRegistro");
     if (btnRegistro) {
         btnRegistro.onclick = () => {
-            const valor = inputRegistro.value;
-            const radioReg = document.querySelector('input[name="regTipo"]:checked');
-            if (radioReg && typeof registrarEntradaSalida === 'function') {
-                registrarEntradaSalida(valor, radioReg.value);
+            const input = document.getElementById("inputRegistro");
+            const radio = document.querySelector('input[name="regTipo"]:checked');
+            if (radio && typeof registrarEntradaSalida === 'function') {
+                registrarEntradaSalida(input.value, radio.value);
+                input.value = "";
             }
-            inputRegistro.value = "";
-        };
-    }
-    if (inputRegistro) {
-        inputRegistro.onkeypress = (e) => {
-            if (e.key === "Enter") btnRegistro.click();
         };
     }
 
-    // 5. EXPORTACIONES
-    const bindClick = (id, fn) => {
+    // 5. GESTIÓN DE TRABAJADORES (ALTA/BAJA)
+    const btnAlta = document.getElementById("btnAlta");
+    if (btnAlta) {
+        btnAlta.onclick = () => {
+            const n = document.getElementById("inputNombre").value;
+            const d = document.getElementById("inputDNI").value;
+            if (typeof altaTrabajador === 'function') {
+                altaTrabajador(n, d);
+                document.getElementById("inputNombre").value = "";
+                document.getElementById("inputDNI").value = "";
+            }
+        };
+    }
+
+    // 6. EXPORTACIONES
+    const vincular = (id, fn) => {
         const el = document.getElementById(id);
         if (el) el.onclick = fn;
     };
 
-    bindClick("btnExportar", () => { if (typeof exportCSV === 'function') exportCSV(); });
-    bindClick("btnExportarExcel", () => { if (typeof exportExcel === 'function') exportExcel(); });
-    bindClick("btnExportarPDF", () => { if (typeof exportPDF === 'function') exportPDF(); });
-    bindClick("btnExportarPDFResumen", () => { if (typeof exportPDFResumen === 'function') exportPDFResumen(); });
+    vincular("btnExportar", () => typeof exportCSV === 'function' && exportCSV());
+    vincular("btnExportarExcel", () => typeof exportExcel === 'function' && exportExcel());
+    vincular("btnExportarPDF", () => typeof exportPDF === 'function' && exportPDF());
+    vincular("btnExportarPDFResumen", () => typeof exportPDFResumen === 'function' && exportPDFResumen());
 
-    // 6. FILTROS DE TABLA
-    ["selectorTrabajador", "mesSeleccionado", "fDesde", "fHasta"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.onchange = () => { if (typeof renderTabla === 'function') renderTabla(); };
-    });
+    // 7. MODALES Y FILTROS
+    vincular("btnRegistroManual", () => typeof abrirModalRegistroManual === 'function' && abrirModalRegistroManual());
+    vincular("cerrarModal", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
+    vincular("btnCancelarManual", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
+    vincular("btnGuardarManual", () => typeof guardarRegistroManual === 'function' && guardarRegistroManual());
 
-    // 7. MODALES (REGISTRO MANUAL Y EDICIÓN)
-    bindClick("btnRegistroManual", () => { if (typeof abrirModalRegistroManual === 'function') abrirModalRegistroManual(); });
-    bindClick("cerrarModal", () => { if (typeof cerrarModalRegistroManual === 'function') cerrarModalRegistroManual(); });
-    bindClick("btnCancelarManual", () => { if (typeof cerrarModalRegistroManual === 'function') cerrarModalRegistroManual(); });
-    bindClick("btnGuardarManual", () => { if (typeof guardarRegistroManual === 'function') guardarRegistroManual(); });
+    vincular("cerrarModalEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
+    vincular("btnCancelarEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
+    vincular("btnGuardarEditar", () => typeof guardarEditarRegistro === 'function' && guardarEditarRegistro());
 
-    bindClick("cerrarModalEditar", () => { if (typeof cerrarModalEditarRegistro === 'function') cerrarModalEditarRegistro(); });
-    bindClick("btnCancelarEditar", () => { if (typeof cerrarModalEditarRegistro === 'function') cerrarModalEditarRegistro(); });
-    bindClick("btnGuardarEditar", () => { if (typeof guardarEditarRegistro === 'function') guardarEditarRegistro(); });
-
-    // 9. CERRAR MODALES AL HACER CLIC FUERA
+    // 8. CIERRE DE MODALES AL CLICAR FUERA
     window.onclick = (e) => {
-        const modalRegistro = document.getElementById("modalRegistroManual");
-        const modalEditar = document.getElementById("modalEditarRegistro");
-        if (e.target === modalRegistro && typeof cerrarModalRegistroManual === 'function') {
-            cerrarModalRegistroManual();
-        }
-        if (e.target === modalEditar && typeof cerrarModalEditarRegistro === 'function') {
-            cerrarModalEditarRegistro();
-        }
+        const modalReg = document.getElementById("modalRegistroManual");
+        const modalEdi = document.getElementById("modalEditarRegistro");
+        if (e.target === modalReg) cerrarModalRegistroManual();
+        if (e.target === modalEdi) cerrarModalEditarRegistro();
     };
 
-    // INICIALIZACIÓN FINAL
+    // Inicializar UI al cargar
     if (typeof refreshUI === 'function') refreshUI();
+});
 
-}); // <-- CIERRE CORRECTO
 </script>
+</body>
+</html>
