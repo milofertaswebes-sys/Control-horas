@@ -1377,30 +1377,44 @@ async function bajaTrabajador(valor, tipo) {
       return { datos, trabajadorId, mes, desde, hasta };
     }
 
-    function renderTabla() {
+
+	  
+   function renderTabla() {
+      console.log("🎨 Dibujando tabla de registros...");
       const tbody = document.querySelector("#tablaHoras tbody");
+      if (!tbody) return;
+      
       tbody.innerHTML = "";
       const { datos } = obtenerDatosFiltrados();
       const tById = new Map(trabajadores.map(t => [t.id, t]));
 
-      if (!datos.length) {
+      if (!datos || !datos.length) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No hay registros</td></tr>`;
-        document.getElementById("totalHoras").textContent = "0.00";
+        const totalEl = document.getElementById("totalHoras");
+        if (totalEl) totalEl.textContent = "0.00";
         return;
       }
 
       let total = 0;
-      datos.sort((a,b) => (a.fecha + a.entradaISO).localeCompare(b.fecha + b.entradaISO));
+
+      // --- ORDENACIÓN CORREGIDA (Línea 1393 aprox) ---
+      // Usamos una comparación segura que no falla si faltan datos
+      datos.sort((a, b) => {
+        const fechaA = (a.fecha || "") + (a.entradaISO || "");
+        const fechaB = (b.fecha || "") + (b.entradaISO || "");
+        return fechaA.localeCompare(fechaB);
+      });
+
       datos.forEach(r => {
         total += r.horas || 0;
         const trabajador = tById.get(r.trabajadorId) || {};
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${trabajador.numero || ""}</td>
-          <td>${r.fecha}</td>
+          <td>${r.fecha || "-"}</td>
           <td>${r.entradaISO ? formatTimeForRender(r.entradaISO) : ""}</td>
           <td>${r.salidaISO ? formatTimeForRender(r.salidaISO) : ""}</td>
-          <td>${(r.horas||0).toFixed(2)}</td>
+          <td>${(r.horas || 0).toFixed(2)}</td>
           <td>
             ${usuarioActual && usuarioActual.rol === "admin" ? 
               `<button class="action-btn btn-blue" onclick="abrirModalEditarRegistro('${r.id}')">
@@ -1412,7 +1426,10 @@ async function bajaTrabajador(valor, tipo) {
         `;
         tbody.appendChild(tr);
       });
-      document.getElementById("totalHoras").textContent = total.toFixed(2);
+
+      const totalEl = document.getElementById("totalHoras");
+      if (totalEl) totalEl.textContent = total.toFixed(2);
+      console.log("✨ Tabla renderizada correctamente.");
     }
 
     /** CSV */
