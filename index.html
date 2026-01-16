@@ -307,24 +307,35 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
  
-  <script type="module">
-	   // --- crea el MOTOR para tablas en Firebase ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-	  
+<script type="module">
+    // --- crea el MOTOR para tablas en Firebase ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        getDocs, 
+        onSnapshot, 
+        query, 
+        orderBy, 
+        doc, 
+        getDoc, 
+        deleteDoc // <--- HE AÑADIDO ESTO AQUÍ
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCI1nLERKCHwMluF5NYbBgLuxmUbJ6REmQ",
-            authDomain: "controlhorasgines.firebaseapp.com",
-            projectId: "controlhorasgines",
-            storageBucket: "controlhorasgines.firebasestorage.app",
-            messagingSenderId: "32537920791",
-            appId: "1:32537920791:web:d1852e2e6220e71913a352"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCI1nLERKCHwMluF5NYbBgLuxmUbJ6REmQ",
+        authDomain: "controlhorasgines.firebaseapp.com",
+        projectId: "controlhorasgines",
+        storageBucket: "controlhorasgines.firebasestorage.app",
+        messagingSenderId: "32537920791",
+        appId: "1:32537920791:web:d1852e2e6220e71913a352"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+	
 // Hacemos que la base de datos y las funciones de Firebase sean accesibles
         window.dbCloud = db;
         window.addDoc = addDoc;
@@ -334,6 +345,8 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, 
         window.orderBy = orderBy;	  
         window.doc = doc;
        window.getDoc = getDoc;
+	  // --- AÑADE ESTA LÍNEA ---
+      window.deleteDoc = deleteDoc;
         
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
@@ -1733,6 +1746,40 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof refreshUI === 'function') refreshUI();
 });
 
+	  async function borrarTodoSistema() {
+    // La confirmación que pedías
+    if (confirm("⚠️ ¿ESTÁS SEGURO? Se borrarán todos los fichajes de la NUBE y de este PC definitivamente.")) {
+        
+        try {
+            const baseDatos = window.dbCloud;
+            const _collection = window.collection;
+            const _getDocs = window.getDocs;
+            const _deleteDoc = window.deleteDoc;
+            const _doc = window.doc;
+
+            // 1. Buscamos todos los documentos en la nube
+            const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
+            
+            // 2. Los borramos uno a uno
+            const promesas = snapshot.docs.map(d => _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id)));
+            await Promise.all(promesas);
+
+            // 3. Limpiamos la memoria del PC
+            localStorage.clear();
+
+            alert("✅ Todo borrado. La página se reiniciará.");
+            location.reload();
+
+        } catch (error) {
+            console.error(error);
+            alert("Error al borrar. Mira la consola.");
+        }
+    }
+}
+
 </script>
-</body>
+<button onclick="borrarTodoSistema()" style="background:red; color:white; padding:10px; margin:20px; cursor:pointer;">
+    🗑️ BORRAR TODO (Nube y PC)
+</button>	
+	</body>
 </html>
