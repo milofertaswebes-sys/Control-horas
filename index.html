@@ -337,7 +337,8 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, 
         
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
-async function descargarDatosNube() {
+
+	  async function descargarDatosNube() {
     console.log("📡 [PC 1] Descargando registros individuales de la nube...");
 
     try {
@@ -348,40 +349,43 @@ async function descargarDatosNube() {
         const baseDatos = window.dbCloud || db;
 
         if (!_getDocs || !_collection) {
-            console.error("❌ No tengo las herramientas de lectura (getDocs/collection)");
+            console.error("❌ No tengo las herramientas de lectura");
             return;
         }
 
-        // 1. DESCARGAR TRABAJADORES (Sigue igual si lo tienes en 'unico')
-        // (Si los trabajadores también están sueltos, dímelo)
-
-        // 2. DESCARGAR REGISTROS (Uno por uno)
         const q = _query(_collection(baseDatos, 'registros_v2026'), _orderBy('timestamp', 'desc'));
         const querySnapshot = await _getDocs(q);
         
-        let nuevosFichajes = [];
+        let datosRecuperados = [];
         querySnapshot.forEach((doc) => {
-            // Extraemos los datos de cada documento
             const data = doc.data();
-            // Si el documento tiene una propiedad 'data' que es un array (vuestro formato)
+            // Si el documento contiene un array llamado 'data', lo extraemos
             if (data.data && Array.isArray(data.data)) {
-                nuevosFichajes = nuevosFichajes.concat(data.data);
+                datosRecuperados = datosRecuperados.concat(data.data);
             } else {
-                // Si el documento es el registro directamente
-                nuevosFichajes.push(data);
+                // Si el documento es el registro directo, lo añadimos
+                datosRecuperados.push(data);
             }
         });
 
-        if (nuevosFichajes.length > 0) {
-            fichajes = nuevosFichajes;
-            localStorage.setItem('fichajes', JSON.stringify(fichajes));
-            console.log(`✅ ¡ÉXITO! Se han recuperado ${fichajes.length} registros individuales.`);
-        } else {
-            console.log("⚠️ No se encontraron registros en la colección.");
+        if (datosRecuperados.length > 0) {
+            // --- AQUÍ EVITAMOS EL ERROR ---
+            // Guardamos en LocalStorage directamente para que persista
+            localStorage.setItem('fichajes', JSON.stringify(datosRecuperados));
+            
+            // Intentamos asignar a la variable global que use tu sistema
+            if (typeof fichajes !== 'undefined') {
+                fichajes = datosRecuperados;
+            } else if (typeof registros !== 'undefined') {
+                registros = datosRecuperados;
+            }
+            
+            console.log(`✅ ¡ÉXITO! Se han recuperado ${datosRecuperados.length} registros.`);
         }
 
         // 3. ACTUALIZAR PANTALLA
         if (typeof renderTabla === 'function') renderTabla();
+        else if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
 
     } catch (error) {
         console.error("❌ Error en la descarga profunda:", error);
