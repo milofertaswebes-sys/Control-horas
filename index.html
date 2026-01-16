@@ -271,6 +271,32 @@
       font-size: 0.875rem;
       margin: 0 0.125rem;
     }
+
+    /* Modal Cambio de Contraseña */
+    .modal-password {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-password-content {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      max-width: 500px;
+      width: 90%;
+      padding: 24px;
+    }
+    html[data-theme="dark"] .modal-password-content {
+      background: #1f2937;
+      color: #e5e7eb;
+    }
   </style>
 
   <!-- PDF -->
@@ -467,6 +493,51 @@ setTimeout(() => {
             <i class="fas fa-save mr-2"></i>Guardar
           </button>
           <button id="btnCancelarEditar" class="btn btn-gray flex-1">
+            <i class="fas fa-times mr-2"></i>Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para cambio de contraseña -->
+  <div id="modalCambioPass" class="modal-password">
+    <div class="modal-password-content p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">🔑 Cambiar Contraseña</h3>
+        <button id="cerrarModalCambioPass" class="text-2xl">&times;</button>
+      </div>
+      <div class="space-y-4">
+        <label class="block">
+          <span class="text-sm font-medium">Usuario</span>
+          <select id="selectUsuarioPass" class="w-full mt-1">
+            <option value="admin">admin</option>
+            <option value="usuario">usuario</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium">Nueva Contraseña</span>
+          <div class="password-container">
+            <input type="password" id="nuevaPassword" class="w-full mt-1" placeholder="Introduce nueva contraseña" />
+            <span class="password-toggle" id="toggleNewPassword">
+              <i class="fas fa-eye"></i>
+            </span>
+          </div>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium">Confirmar Contraseña</span>
+          <div class="password-container">
+            <input type="password" id="confirmarPassword" class="w-full mt-1" placeholder="Confirma la nueva contraseña" />
+            <span class="password-toggle" id="toggleConfirmPassword">
+              <i class="fas fa-eye"></i>
+            </span>
+          </div>
+        </label>
+        <div class="flex gap-3 pt-4">
+          <button id="btnGuardarCambioPass" class="btn btn-green flex-1">
+            <i class="fas fa-save mr-2"></i>Guardar
+          </button>
+          <button id="btnCancelarCambioPass" class="btn btn-gray flex-1">
             <i class="fas fa-times mr-2"></i>Cancelar
           </button>
         </div>
@@ -1481,6 +1552,21 @@ try {
         applyTheme(current === "dark" ? "light" : "dark");
       });
 
+      // Eventos para el cambio de contraseña
+      document.getElementById("btnCambioPass").addEventListener("click", abrirModalCambioPass);
+      document.getElementById("cerrarModalCambioPass").addEventListener("click", cerrarModalCambioPass);
+      document.getElementById("btnCancelarCambioPass").addEventListener("click", cerrarModalCambioPass);
+      document.getElementById("btnGuardarCambioPass").addEventListener("click", guardarCambioPass);
+      
+      // Toggle password visibility for change password modal
+      document.getElementById("toggleNewPassword").addEventListener("click", function() {
+        togglePasswordVisibility("nuevaPassword", "toggleNewPassword");
+      });
+      document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+        togglePasswordVisibility("confirmarPassword", "toggleConfirmPassword");
+      });
+    });
+
 // --- BLOQUE FINAL DE CONTROL: LOGIN, REGISTROS Y MODALES ---
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1580,8 +1666,11 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onclick = (e) => {
         const modalReg = document.getElementById("modalRegistroManual");
         const modalEdi = document.getElementById("modalEditarRegistro");
+        const modalPass = document.getElementById("modalCambioPass");
+        
         if (e.target === modalReg) cerrarModalRegistroManual();
         if (e.target === modalEdi) cerrarModalEditarRegistro();
+        if (e.target === modalPass) cerrarModalCambioPass();
     };
 
     // Inicializar UI al cargar
