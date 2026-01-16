@@ -338,7 +338,7 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, 
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Descargando trabajadores y fichajes...");
+    console.log("📡 [PC 1] Iniciando escaneo de datos...");
 
     try {
         const fDoc = window.doc;
@@ -352,7 +352,6 @@ async function descargarDatosNube() {
         if (snapT.exists()) {
             trabajadores = snapT.data().data || [];
             localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-            console.log(`✅ ${trabajadores.length} trabajadores listos.`);
         }
 
         // 2. DESCARGAR REGISTROS (Fichajes)
@@ -360,21 +359,17 @@ async function descargarDatosNube() {
         if (snapR.exists()) {
             fichajes = snapR.data().data || [];
             localStorage.setItem('fichajes', JSON.stringify(fichajes));
-            console.log(`✅ ${fichajes.length} fichajes recuperados.`);
+            
+            // --- EL ESCÁNER ---
+            console.log("📊 DATOS RECIBIDOS DE LA NUBE:");
+            console.table(fichajes.slice(0, 5)); // Muestra los primeros 5 fichajes para revisar
         }
 
-        // 3. ¡FORZAR EL DIBUJO DE LA TABLA!
-        console.log("🎨 Dibujando tabla de registros...");
-        
-        // Esta es la parte clave:
-        if (typeof renderTabla === 'function') {
-            renderTabla(); 
-        } else if (typeof mostrarRegistros === 'function') {
-            mostrarRegistros();
-        }
+        // 3. REFRESCAR TABLA
+        if (typeof renderTabla === 'function') renderTabla();
 
     } catch (error) {
-        console.error("❌ Error en la descarga:", error);
+        console.error("❌ Error:", error);
     }
 }
 	  
