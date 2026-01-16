@@ -334,25 +334,19 @@ window.orderBy = orderBy;
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga directa...");
+    console.log("📡 [PC 1] Iniciando descarga (Método de Objeto)...");
 
     try {
-        // --- ESTE ES EL TRUCO PARA DEFINIR DOC Y GETDOC ---
-        const firestore = window.firebase ? window.firebase.firestore : null;
-        const _doc = typeof doc !== 'undefined' ? doc : (window.doc || null);
-        const _getDoc = typeof getDoc !== 'undefined' ? getDoc : (window.getDoc || null);
+        // Buscamos las funciones dentro del objeto global de Firebase
+        const f = window.FirebaseFirestore || (window.firebase ? window.firebase.firestore : null);
+        
+        // Intentamos obtener el documento de trabajadores
+        // Usamos la ruta directa que suele funcionar en estos entornos
+        const docRefT = doc(db, "trabajadores_v2026", "unico");
+        const docSnapT = await getDoc(docRefT);
 
-        // Si el método anterior falla, intentamos extraerlos del objeto global si existen
-        if (!_doc || !_getDoc) {
-             console.log("Intentando recuperar herramientas de Firebase...");
-        }
-
-        // 1. LEER TRABAJADORES
-        const refT = _doc(db, "trabajadores_v2026", "unico");
-        const snapT = await _getDoc(refT);
-
-        if (snapT.exists()) {
-            const dataT = snapT.data().data;
+        if (docSnapT.exists()) {
+            const dataT = docSnapT.data().data;
             if (Array.isArray(dataT)) {
                 trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
@@ -360,12 +354,11 @@ async function descargarDatosNube() {
             }
         }
 
-        // 2. LEER REGISTROS (HORAS)
-        const refR = _doc(db, "registros_v2026", "unico");
-        const snapR = await _getDoc(refR);
+        const docRefR = doc(db, "registros_v2026", "unico");
+        const docSnapR = await getDoc(docRefR);
 
-        if (snapR.exists()) {
-            const dataR = snapR.data().data;
+        if (docSnapR.exists()) {
+            const dataR = docSnapR.data().data;
             if (Array.isArray(dataR)) {
                 fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
@@ -373,30 +366,29 @@ async function descargarDatosNube() {
             }
         }
 
-        // 3. ACTUALIZAR PANTALLA
-        console.log("🎨 Actualizando tabla...");
         if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
 
     } catch (error) {
-        console.error("❌ Error en la descarga:", error.message);
+        console.error("❌ Error en descarga:", error.message);
         
-        // --- PLAN B: SI TODO LO ANTERIOR FALLA POR LA VERSIÓN ---
+        // --- ÚLTIMO RECURSO: BÚSQUEDA MANUAL ---
+        console.log("Intentando acceso mediante instancia...");
         try {
-            console.log("Intentando Plan B (Sintaxis antigua)...");
-            const snapT = await db.collection('trabajadores_v2026').doc('unico').get();
-            if (snapT.exists) {
-                trabajadores = snapT.data().data;
-                localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                if (typeof actualizarSelector === 'function') actualizarSelector();
-                if (typeof renderTabla === 'function') renderTabla();
-                console.log("✅ Recuperado con Plan B");
+            // Si el error es que doc no existe, intentamos usar el objeto db directamente
+            const snapT = await db._delegate? getDoc(doc(db, "trabajadores_v2026", "unico")) : null;
+            if (snapT && snapT.exists()) {
+                 trabajadores = snapT.data().data;
+                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
+                 actualizarSelector();
+                 renderTabla();
             }
-        } catch (e2) {
-             console.error("Fallo definitivo:", e2.message);
+        } catch (e3) {
+            console.error("Error crítico: No se encuentran las funciones de lectura.");
         }
     }
 }
+	  
 // --- INICIO AUTOMÁTICO ---
 setTimeout(() => {
     descargarDatosNube();
