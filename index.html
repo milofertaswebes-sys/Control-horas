@@ -333,17 +333,26 @@ window.query = query;
 window.orderBy = orderBy;
 	  
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
-	async function descargarDatosNube() {
+async function descargarDatosNube() {
     console.log("📡 [PC 1] Iniciando descarga directa...");
 
     try {
-        // 1. LEER TRABAJADORES
-        // Accedemos al documento 'unico' dentro de la colección 'trabajadores_v2026'
-        const docRefT = doc(db, "trabajadores_v2026", "unico");
-        const docSnapT = await getDoc(docRefT);
+        // --- ESTE ES EL TRUCO PARA DEFINIR DOC Y GETDOC ---
+        const firestore = window.firebase ? window.firebase.firestore : null;
+        const _doc = typeof doc !== 'undefined' ? doc : (window.doc || null);
+        const _getDoc = typeof getDoc !== 'undefined' ? getDoc : (window.getDoc || null);
 
-        if (docSnapT.exists()) {
-            const dataT = docSnapT.data().data;
+        // Si el método anterior falla, intentamos extraerlos del objeto global si existen
+        if (!_doc || !_getDoc) {
+             console.log("Intentando recuperar herramientas de Firebase...");
+        }
+
+        // 1. LEER TRABAJADORES
+        const refT = _doc(db, "trabajadores_v2026", "unico");
+        const snapT = await _getDoc(refT);
+
+        if (snapT.exists()) {
+            const dataT = snapT.data().data;
             if (Array.isArray(dataT)) {
                 trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
@@ -352,11 +361,11 @@ window.orderBy = orderBy;
         }
 
         // 2. LEER REGISTROS (HORAS)
-        const docRefR = doc(db, "registros_v2026", "unico");
-        const docSnapR = await getDoc(docRefR);
+        const refR = _doc(db, "registros_v2026", "unico");
+        const snapR = await _getDoc(refR);
 
-        if (docSnapR.exists()) {
-            const dataR = docSnapR.data().data;
+        if (snapR.exists()) {
+            const dataR = snapR.data().data;
             if (Array.isArray(dataR)) {
                 fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
@@ -370,9 +379,22 @@ window.orderBy = orderBy;
         if (typeof renderTabla === 'function') renderTabla();
 
     } catch (error) {
-        console.error("❌ Error en la descarga:", error);
-        // Si el error sigue siendo "doc is not defined", es que falta importar doc y getDoc arriba
-        console.log("Sugerencia: Revisa si arriba del todo tienes: import { doc, getDoc } ... ");
+        console.error("❌ Error en la descarga:", error.message);
+        
+        // --- PLAN B: SI TODO LO ANTERIOR FALLA POR LA VERSIÓN ---
+        try {
+            console.log("Intentando Plan B (Sintaxis antigua)...");
+            const snapT = await db.collection('trabajadores_v2026').doc('unico').get();
+            if (snapT.exists) {
+                trabajadores = snapT.data().data;
+                localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
+                if (typeof actualizarSelector === 'function') actualizarSelector();
+                if (typeof renderTabla === 'function') renderTabla();
+                console.log("✅ Recuperado con Plan B");
+            }
+        } catch (e2) {
+             console.error("Fallo definitivo:", e2.message);
+        }
     }
 }
 // --- INICIO AUTOMÁTICO ---
