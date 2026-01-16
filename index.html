@@ -331,53 +331,50 @@
 	  window.getDocs = getDocs;
 window.query = query;
 window.orderBy = orderBy;
+	  
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga profunda de datos...");
+    console.log("📡 [PC 1] Iniciando descarga directa de la nube...");
 
     try {
-        // --- ESPÍA DE TRABAJADORES ---
-        if (typeof leerDatosNube === 'function') {
-            console.log("🔍 Buscando en nube: trabajadores_v2026..."); // Chivato 1
-            const trabajadoresNube = await leerDatosNube('trabajadores_v2026');
-            
-            // AQUÍ ESTÁ LA CLAVE: Vamos a ver qué trae exactamente
-            console.log("📦 RESPUESTA CRUDA TRABAJADORES:", trabajadoresNube); 
-
-            if (trabajadoresNube && Array.isArray(trabajadoresNube) && trabajadoresNube.length > 0) {
-                console.log(`✅ ¡ÉXITO! Trabajadores recibidos: ${trabajadoresNube.length}`);
-                trabajadores = trabajadoresNube;
+        // 1. DESCARGAR TRABAJADORES
+        // Accedemos directamente al documento "unico" en la colección de 2026
+        const docT = await db.collection('trabajadores_v2026').doc('unico').get();
+        
+        if (docT.exists) {
+            const dataT = docT.data().data; // Extraemos el array de trabajadores
+            if (dataT && Array.isArray(dataT)) {
+                trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                if (typeof actualizarSelector === 'function') actualizarSelector();
-            } else {
-                console.warn("⚠️ La nube ha devuelto datos vacíos o incorrectos para trabajadores.");
+                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores bajados del PC 2.`);
             }
+        } else {
+            console.warn("⚠️ No se encontró el documento de trabajadores en la nube.");
         }
 
-        // --- ESPÍA DE REGISTROS ---
-        if (typeof leerDatosNube === 'function') {
-            console.log("🔍 Buscando en nube: registros_v2026..."); // Chivato 2
-            const registrosNube = await leerDatosNube('registros_v2026');
-            
-            console.log("📦 RESPUESTA CRUDA REGISTROS:", registrosNube); 
-
-            if (registrosNube && Array.isArray(registrosNube) && registrosNube.length > 0) {
-                console.log(`✅ ¡ÉXITO! Fichajes recibidos: ${registrosNube.length}`);
-                fichajes = registrosNube; 
+        // 2. DESCARGAR REGISTROS (Fichajes)
+        const docR = await db.collection('registros_v2026').doc('unico').get();
+        
+        if (docR.exists) {
+            const dataR = docR.data().data; // Extraemos el array de fichajes
+            if (dataR && Array.isArray(dataR)) {
+                fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
-            } else {
-                console.warn("⚠️ La nube ha devuelto datos vacíos o incorrectos para registros.");
+                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes bajados del PC 2.`);
             }
+        } else {
+            console.warn("⚠️ No se encontró el documento de registros en la nube.");
         }
 
-        console.log("🎨 Actualizando tabla en pantalla...");
+        // 3. ACTUALIZAR TODO VISUALMENTE
+        console.log("🎨 Dibujando datos en pantalla...");
+        if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
         if (typeof refreshUI === 'function') refreshUI();
 
     } catch (error) {
-        console.error("❌ Error grave en descargarDatosNube:", error);
+        console.error("❌ Error técnico en descargarDatosNube:", error);
     }
 }
-
 // --- INICIO AUTOMÁTICO ---
 setTimeout(() => {
     descargarDatosNube();
