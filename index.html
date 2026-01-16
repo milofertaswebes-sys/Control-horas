@@ -333,39 +333,41 @@ window.query = query;
 window.orderBy = orderBy;
 	  
 async function descargarDatosNube() {
-    console.log("📡 [PC 1] Iniciando descarga directa de la nube...");
+    console.log("📡 [PC 1] Iniciando descarga compatible con Firebase v9+...");
 
     try {
         // 1. DESCARGAR TRABAJADORES
-        // Accedemos directamente al documento "unico" en la colección de 2026
-        const docT = await db.collection('trabajadores_v2026').doc('unico').get();
+        // Usamos la sintaxis moderna: doc(db, coleccion, id)
+        const refT = doc(db, 'trabajadores_v2026', 'unico');
+        const docT = await getDoc(refT);
         
-        if (docT.exists) {
-            const dataT = docT.data().data; // Extraemos el array de trabajadores
+        if (docT.exists()) {
+            const dataT = docT.data().data;
             if (dataT && Array.isArray(dataT)) {
                 trabajadores = dataT;
                 localStorage.setItem('trabajadores', JSON.stringify(trabajadores));
-                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores bajados del PC 2.`);
+                console.log(`✅ ¡ÉXITO! ${trabajadores.length} trabajadores bajados.`);
             }
         } else {
-            console.warn("⚠️ No se encontró el documento de trabajadores en la nube.");
+            console.warn("⚠️ No se encontró el documento 'unico' en trabajadores_v2026");
         }
 
         // 2. DESCARGAR REGISTROS (Fichajes)
-        const docR = await db.collection('registros_v2026').doc('unico').get();
+        const refR = doc(db, 'registros_v2026', 'unico');
+        const docR = await getDoc(refR);
         
-        if (docR.exists) {
-            const dataR = docR.data().data; // Extraemos el array de fichajes
+        if (docR.exists()) {
+            const dataR = docR.data().data;
             if (dataR && Array.isArray(dataR)) {
                 fichajes = dataR;
                 localStorage.setItem('fichajes', JSON.stringify(fichajes));
-                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes bajados del PC 2.`);
+                console.log(`✅ ¡ÉXITO! ${fichajes.length} fichajes bajados.`);
             }
         } else {
-            console.warn("⚠️ No se encontró el documento de registros en la nube.");
+            console.warn("⚠️ No se encontró el documento 'unico' en registros_v2026");
         }
 
-        // 3. ACTUALIZAR TODO VISUALMENTE
+        // 3. ACTUALIZAR PANTALLA
         console.log("🎨 Dibujando datos en pantalla...");
         if (typeof actualizarSelector === 'function') actualizarSelector();
         if (typeof renderTabla === 'function') renderTabla();
