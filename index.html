@@ -332,23 +332,32 @@
         appId: "1:32537920791:web:d1852e2e6220e71913a352"
     };
 
+ // 1. Inicialización de Firebase (Limpia y sin repeticiones)
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-	
-// Hacemos que la base de datos y las funciones de Firebase sean accesibles
-        window.dbCloud = db;
-        window.addDoc = addDoc;
-        window.collection = collection;
-        window.getDocs = getDocs;
-        window.query = query;
-        window.orderBy = orderBy;	  
-        window.doc = doc;
-       window.getDoc = getDoc;
-	  // --- AÑADE ESTA LÍNEA ---
-      window.deleteDoc = deleteDoc;
-        
-	  
+    // 2. Detector de Administrador (Espera a que la página cargue)
+    window.addEventListener('load', () => {
+        const valoresURL = new URLSearchParams(window.location.search);
+        if (valoresURL.get('admin') === 'true') {
+            const cajaAdmin = document.getElementById('zonaAdmin');
+            if (cajaAdmin) {
+                cajaAdmin.style.display = 'block';
+            }
+        }
+    });
+
+    // 3. Conexión de funciones con el sistema (Necesario para el botón de borrar)
+    window.dbCloud = db;
+    window.addDoc = addDoc;
+    window.collection = collection;
+    window.getDocs = getDocs;
+    window.query = query;
+    window.orderBy = orderBy;   
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.deleteDoc = deleteDoc;
+
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 
 	  async function descargarDatosNube() {
@@ -805,16 +814,14 @@ setTimeout(() => {
 
 </table>
         </div>
-      </section>
 
-     <div id="zonaAdmin" style="display: none; margin: 40px auto; max-width: 400px; text-align: center; border: 2px dashed #ef4444; padding: 20px; border-radius: 12px; background-color: #fef2f2;">
+	<div id="zonaAdmin" style="display: none; margin: 40px auto; max-width: 400px; text-align: center; border: 2px dashed #ef4444; padding: 20px; border-radius: 12px; background-color: #fef2f2;">
     <p style="color: #ef4444; font-weight: bold; margin-bottom: 15px; font-size: 14px;">
         <i class="fas fa-exclamation-triangle"></i> ZONA DE ADMINISTRADOR
     </p>
     <button onclick="borrarTodoSistema()" style="background-color: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold;">
         🗑️ BORRAR TODOS LOS REGISTROS
     </button>
-    <p style="font-size: 11px; color: #991b1b; margin-top: 10px;">Esto vaciará la nube y este ordenador definitivamente.</p>
 </div>
       </main>
 		
