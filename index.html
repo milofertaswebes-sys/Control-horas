@@ -3,1814 +3,249 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>馃搵 Control de Horas</title>
+  <title>📋 Control de Horas - Gines</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- Estilos propios -->
   <style>
-    /* ====== Estilos Globales ====== */
     :root {
       --bg-grad-start: #1e3c72;
       --bg-grad-end: #2a5298;
-      --text-contrast-strong: #4c1d95; /* p煤rpura m谩s oscuro para contraste */
-      --banner-bg: #10b981; /* verde */
-      --banner-text: #053b2f;
     }
-    html[data-theme="dark"] {
-      --bg-grad-start: #0f172a;
-      --bg-grad-end: #1f2937;
-      --text-contrast-strong: #7c3aed;
-      --banner-bg: #059669;
-      --banner-text: #e6fffb;
-    }
-
     body {
       background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
+      min-height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
     }
-
-    /* Tarjetas */
-    .card {
-      background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    html[data-theme="dark"] .card { background: #111827; color: #e5e7eb; }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-
-    /* Botones */
-    .btn {
-      padding: 0.6rem 1rem;
-      border-radius: 0.75rem;
-      font-weight: 600;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.15s ease;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      opacity: 0.95;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-    }
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-    .btn-green { background: linear-gradient(90deg, #38a169, #2f855a); }
-    .btn-red { background: linear-gradient(90deg, #e53e3e, #c53030); }
-    .btn-blue { background: linear-gradient(90deg, #3182ce, #2b6cb0); }
-    .btn-orange { background: linear-gradient(90deg, #dd6b20, #c05621); }
-    .btn-purple { background: linear-gradient(90deg, #805ad5, #6b46c1); }
-    .btn-gray { background: linear-gradient(90deg, #718096, #4a5568); }
-
-    /* Header */
-    .header-gradient {
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      border-radius: 0.75rem;
-    }
-
-    /* Tabla */
-    table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-    }
-    th, td {
-      text-align: left;
-      padding: 12px 16px;
-      border-bottom: 1px solid #e2e8f0;
-      white-space: nowrap;
-    }
-    th {
-      background: #edf2f7;
-      font-weight: bold;
-      color: #2d3748;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-    tr:nth-child(even) td {
-      background: #f7fafc;
-    }
-    html[data-theme="dark"] th { background: #1f2937; color: #e5e7eb; }
-    html[data-theme="dark"] td { border-bottom-color: #374151; }
-    html[data-theme="dark"] tr:nth-child(even) td { background: #111827; }
-
-    /* Primera columna sticky (para m贸viles) */
-    #tablaHoras th:first-child,
-    #tablaHoras td:first-child {
-      position: sticky;
-      left: 0;
-      background: #ffffff;
-      z-index: 2;
-    }
-    html[data-theme="dark"] #tablaHoras th:first-child,
-    html[data-theme="dark"] #tablaHoras td:first-child {
-      background: #0b1220;
-    }
-
-    /* Animaciones y feedback */
-    .floating { animation: floating 3s ease-in-out infinite; }
-    @keyframes floating {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-      100% { transform: translateY(0); }
-    }
-    .pulse { animation: pulse 2s infinite; }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(66,153,225,0.6); }
-      70% { box-shadow: 0 0 0 10px rgba(66,153,225,0); }
-      100% { box-shadow: 0 0 0 0 rgba(66,153,225,0); }
-    }
-    .pressable:active { transform: scale(0.98); }
-
-    .last-action {
-      outline: 2px solid #10b981;
-      background: #ecfdf5 !important;
-    }
-    html[data-theme="dark"] .last-action {
-      outline-color: #34d399;
-      background: #064e3b !important;
-      color: #d1fae5;
-    }
-
-    /* Scroll personalizado */
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-thumb {
-      background: #667eea;
-      border-radius: 6px;
-    }
-    ::-webkit-scrollbar-thumb:hover { background: #764ba2; }
-
-    /* ====== Toasts inferiores (las mantengo para info secundaria) ====== */
-    .toast-container {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 9998;
-    }
-    .toast {
-      min-width: 260px;
-      color: #1a202c;
-      background: #fff;
-      border-left: 6px solid #718096;
-      border-radius: 10px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      padding: 12px 14px;
-      animation: slideIn 0.2s ease-out;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .toast.success { border-left-color: #38a169; }
-    .toast.error { border-left-color: #e53e3e; }
-    .toast.warning { border-left-color: #dd6b20; }
-    .toast.info { border-left-color: #3182ce; }
-    .toast .icon { font-size: 18px; }
-    @keyframes slideIn {
-      from { transform: translateY(8px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* ====== Banner superior grande (confirmaciones principales) ====== */
-    .top-banner {
-      position: sticky;
-      top: 0;
-      z-index: 10000;
-      width: 100%;
-      padding: 14px 18px;
-      background: var(--banner-bg);
-      color: var(--banner-text);
-      font-weight: 700;
-      text-align: center;
-      border-bottom: 2px solid rgba(0,0,0,0.1);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-    }
-
-    /* Contraste reforzado para cifras clave */
-    .contrast-strong { color: var(--text-contrast-strong); }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 10001;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      max-width: 500px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    html[data-theme="dark"] .modal-content {
-      background: #1f2937;
-      color: #e5e7eb;
-    }
-
-    /* Login */
-    .login-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10002;
-    }
-
-    /* Ojo de contrase帽a */
-    .password-toggle {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #6b7280;
-    }
-    .password-container {
-      position: relative;
-      width: 100%;
-    }
-
-    /* Botones de acci贸n en tabla */
-    .action-btn {
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      margin: 0 0.125rem;
-    }
-
-    /* Modal Cambio de Contrase帽a */
-    .modal-password {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 10001;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-password-content {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      max-width: 500px;
-      width: 90%;
-      padding: 24px;
-    }
-    html[data-theme="dark"] .modal-password-content {
-      background: #1f2937;
-      color: #e5e7eb;
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
   </style>
+</head>
+<body>
 
-  <!-- PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+  <div id="bannerContainer" class="fixed top-5 right-5 z-50"></div>
 
-  <!-- Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
- 
-<script type="module">
-    // --- crea el MOTOR para tablas en Firebase ---
+  <div id="loginContainer" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
+    <div class="glass-card p-8 w-full max-w-md text-center">
+      <h2 class="text-3xl font-bold mb-6 text-slate-800">Identificación</h2>
+      <input type="text" id="loginUser" placeholder="Usuario" class="w-full p-3 mb-4 border rounded-lg">
+      <input type="password" id="loginPass" placeholder="Contraseña" class="w-full p-3 mb-6 border rounded-lg">
+      <button onclick="ejecutarLogin()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">Entrar</button>
+      <p class="mt-4 text-sm text-slate-500">Admin: admin / admin123 | Usuario: usuario / user123</p>
+    </div>
+  </div>
+
+  <div class="container mx-auto py-10 px-4">
+    <div class="glass-card p-8">
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
+            <h1 class="text-4xl font-extrabold text-slate-800">🚀 Panel de Control</h1>
+            <div id="userInfo" class="text-right">
+                <span id="userName" class="font-bold text-blue-600 uppercase"></span>
+                <button onclick="logout()" class="ml-4 text-red-500 text-sm hover:underline">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <button onclick="abrirModalRegistroManual()" class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition-transform flex flex-col items-center">
+                <i class="fas fa-user-plus text-3xl mb-2"></i>
+                <span class="font-bold text-lg">Nuevo Trabajador</span>
+            </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+            <table class="w-full text-left">
+                <thead class="bg-slate-100 text-slate-700 font-bold">
+                    <tr>
+                        <th class="p-4 uppercase text-xs tracking-wider">Trabajador</th>
+                        <th class="p-4 uppercase text-xs tracking-wider">DNI</th>
+                        <th class="p-4 uppercase text-xs tracking-wider">Fecha Alta</th>
+                        <th class="p-4 uppercase text-xs tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCuerpo" class="divide-y divide-slate-100 text-slate-600">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="zonaAdmin" style="display: none;" class="mt-12 p-6 border-2 border-dashed border-red-400 rounded-2xl bg-red-50 text-center">
+            <h3 class="text-red-600 font-black mb-4">⚠️ ZONA DE ADMINISTRADOR (PELIGRO)</h3>
+            <button onclick="borrarTodoSistema()" class="bg-red-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-red-700">
+                🗑️ BORRAR TODOS LOS REGISTROS DEFINITIVAMENTE
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <div id="modalRegistro" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl">
+        <h2 class="text-2xl font-bold mb-4">Alta de Trabajador</h2>
+        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full p-3 mb-4 border rounded-lg">
+        <input type="text" id="regDNI" placeholder="DNI o NIE" class="w-full p-3 mb-6 border rounded-lg">
+        <div class="flex gap-4">
+            <button onclick="cerrarModalRegistroManual()" class="flex-1 bg-slate-200 p-3 rounded-lg">Cancelar</button>
+            <button onclick="confirmarAlta()" class="flex-1 bg-green-600 text-white p-3 rounded-lg font-bold">Guardar</button>
+        </div>
+    </div>
+  </div>
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getFirestore, 
-        collection, 
-        addDoc, 
-        getDocs, 
-        onSnapshot, 
-        query, 
-        orderBy, 
-        doc, 
-        getDoc, 
-        deleteDoc // <--- HE A脩ADIDO ESTO AQU脥
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // TU CONFIGURACIÓN DE FIREBASE (Asegúrate que sea la tuya)
     const firebaseConfig = {
-        apiKey: "AIzaSyCI1nLERKCHwMluF5NYbBgLuxmUbJ6REmQ",
-        authDomain: "controlhorasgines.firebaseapp.com",
-        projectId: "controlhorasgines",
-        storageBucket: "controlhorasgines.firebasestorage.app",
-        messagingSenderId: "32537920791",
-        appId: "1:32537920791:web:d1852e2e6220e71913a352"
+      apiKey: "AIzaSyB...", // PON AQUÍ TU API KEY REAL
+      authDomain: "controlhorasgines.firebaseapp.com",
+      projectId: "controlhorasgines",
+      storageBucket: "controlhorasgines.appspot.com",
+      messagingSenderId: "...",
+      appId: "..."
     };
 
- // 1. Inicializaci贸n de Firebase (Limpia y sin repeticiones)
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 2. Detector de Administrador (Espera a que la p谩gina cargue)
-    window.addEventListener('load', () => {
-        const valoresURL = new URLSearchParams(window.location.search);
-        if (valoresURL.get('admin') === 'true') {
-            const cajaAdmin = document.getElementById('zonaAdmin');
-            if (cajaAdmin) {
-                cajaAdmin.style.display = 'block';
-            }
-        }
-    });
-
-    // 3. Conexi贸n de funciones con el sistema (Necesario para el bot贸n de borrar)
+    // Hacer funciones accesibles globalmente
     window.dbCloud = db;
-    window.addDoc = addDoc;
     window.collection = collection;
+    window.addDoc = addDoc;
     window.getDocs = getDocs;
-    window.query = query;
-    window.orderBy = orderBy;   
-    window.doc = doc;
-    window.getDoc = getDoc;
     window.deleteDoc = deleteDoc;
+    window.doc = doc;
+    window.query = query;
+    window.orderBy = orderBy;
 
-// --- L脥NEA 335: NUEVA FUNCI脫N DE DESCARGA AUT脫NOMA ---
-
-	  async function descargarDatosNube() {
-    console.log("馃摗 [PC 1] Descargando registros individuales de la nube...");
-
-    try {
-        const _collection = window.collection;
-        const _getDocs = window.getDocs;
-        const _query = window.query;
-        const _orderBy = window.orderBy;
-        const baseDatos = window.dbCloud || db;
-
-        if (!_getDocs || !_collection) {
-            console.error("鉂?No tengo las herramientas de lectura");
-            return;
+    // --- DETECTOR DE ADMINISTRADOR (OCULTA EL BOTÓN) ---
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'true') {
+            document.getElementById('zonaAdmin').style.display = 'block';
         }
+        descargarDatosNube(); // Carga los datos del PC2 nada más entrar
+        checkSesion();
+    });
+  </script>
 
-        const q = _query(_collection(baseDatos, 'registros_v2026'), _orderBy('timestamp', 'desc'));
-        const querySnapshot = await _getDocs(q);
-        
-        let datosRecuperados = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            // Si el documento contiene un array llamado 'data', lo extraemos
-            if (data.data && Array.isArray(data.data)) {
-                datosRecuperados = datosRecuperados.concat(data.data);
-            } else {
-                // Si el documento es el registro directo, lo a帽adimos
-                datosRecuperados.push(data);
-            }
-        });
-
-        if (datosRecuperados.length > 0) {
-            // --- AQU脥 EVITAMOS EL ERROR ---
-            // Guardamos en LocalStorage directamente para que persista
-            localStorage.setItem('fichajes', JSON.stringify(datosRecuperados));
-            
-            // Intentamos asignar a la variable global que use tu sistema
-            if (typeof fichajes !== 'undefined') {
-                fichajes = datosRecuperados;
-            } else if (typeof registros !== 'undefined') {
-                registros = datosRecuperados;
-            }
-            
-            console.log(`鉁?隆脡XITO! Se han recuperado ${datosRecuperados.length} registros.`);
-        }
-
-        // 3. ACTUALIZAR PANTALLA
-        if (typeof renderTabla === 'function') renderTabla();
-        else if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
-
-    } catch (error) {
-        console.error("鉂?Error en la descarga profunda:", error);
-    }
-}
-	  
-// --- INICIO AUTOM脕TICO ---
-setTimeout(() => {
-    descargarDatosNube();
-}, 2000);
-
-</script>
-</head>
-<body class="p-4">
-  <div id="top-banner" class="top-banner" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-
-  <div id="loginContainer" class="login-container">
-    <div class="card p-8 max-w-md w-full">
-      <h2 class="text-2xl font-bold text-center mb-6">馃攼 Acceso al Sistema</h2>
-      <div class="space-y-4">
-        <label class="block">
-          <span class="text-sm font-medium">Usuario</span>
-          <input type="text" id="loginUsuario" class="w-full mt-1" placeholder="admin o usuario" />
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Contrase帽a</span>
-          <div class="password-container">
-            <input type="password" id="loginPassword" class="w-full mt-1" placeholder="admin123 o user123" />
-            <span class="password-toggle" id="toggleLoginPassword">
-              <i class="fas fa-eye"></i>
-            </span>
-          </div>
-        </label>
-        <button id="btnLogin" class="btn btn-blue w-full">
-          <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesi贸n
-        </button>
-        <div id="loginError" class="text-red-500 text-sm hidden"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="modalRegistroManual" class="modal">
-    <div class="modal-content p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">鉃?Registro Manual de Horas</h3>
-        <button id="cerrarModal" class="text-2xl">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <label class="block">
-          <span class="text-sm font-medium">Trabajador</span>
-          <select id="manualTrabajador" class="w-full mt-1"></select>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Fecha</span>
-          <input type="date" id="manualFecha" class="w-full mt-1" />
-        </label>
-        <div class="grid grid-cols-2 gap-4">
-          <label class="block">
-            <span class="text-sm font-medium">Entrada (HH:MM)</span>
-            <input type="time" id="manualEntrada" class="w-full mt-1" />
-          </label>
-          <label class="block">
-            <span class="text-sm font-medium">Salida (HH:MM)</span>
-            <input type="time" id="manualSalida" class="w-full mt-1" />
-          </label>
-        </div>
-        <div class="flex gap-3 pt-4">
-          <button id="btnGuardarManual" class="btn btn-green flex-1">
-            <i class="fas fa-save mr-2"></i>Guardar
-          </button>
-          <button id="btnCancelarManual" class="btn btn-gray flex-1">
-            <i class="fas fa-times mr-2"></i>Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modal para editar registro -->
-  <div id="modalEditarRegistro" class="modal">
-    <div class="modal-content p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">鉁忥笍 Editar Registro</h3>
-        <button id="cerrarModalEditar" class="text-2xl">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <input type="hidden" id="editarRegistroId" />
-        <label class="block">
-          <span class="text-sm font-medium">Trabajador</span>
-          <select id="editarTrabajador" class="w-full mt-1" disabled></select>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Fecha</span>
-          <input type="date" id="editarFecha" class="w-full mt-1" />
-        </label>
-        <div class="grid grid-cols-2 gap-4">
-          <label class="block">
-            <span class="text-sm font-medium">Entrada (HH:MM)</span>
-            <input type="time" id="editarEntrada" class="w-full mt-1" />
-          </label>
-          <label class="block">
-            <span class="text-sm font-medium">Salida (HH:MM)</span>
-            <input type="time" id="editarSalida" class="w-full mt-1" />
-          </label>
-        </div>
-        <div class="flex gap-3 pt-4">
-          <button id="btnGuardarEditar" class="btn btn-green flex-1">
-            <i class="fas fa-save mr-2"></i>Guardar
-          </button>
-          <button id="btnCancelarEditar" class="btn btn-gray flex-1">
-            <i class="fas fa-times mr-2"></i>Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para cambio de contrase帽a -->
-  <div id="modalCambioPass" class="modal-password">
-    <div class="modal-password-content p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">馃攽 Cambiar Contrase帽a</h3>
-        <button id="cerrarModalCambioPass" class="text-2xl">&times;</button>
-      </div>
-      <div class="space-y-4">
-        <label class="block">
-          <span class="text-sm font-medium">Usuario</span>
-          <select id="selectUsuarioPass" class="w-full mt-1">
-            <option value="admin">admin</option>
-            <option value="usuario">usuario</option>
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Nueva Contrase帽a</span>
-          <div class="password-container">
-            <input type="password" id="nuevaPassword" class="w-full mt-1" placeholder="Introduce nueva contrase帽a" />
-            <span class="password-toggle" id="toggleNewPassword">
-              <i class="fas fa-eye"></i>
-            </span>
-          </div>
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium">Confirmar Contrase帽a</span>
-          <div class="password-container">
-            <input type="password" id="confirmarPassword" class="w-full mt-1" placeholder="Confirma la nueva contrase帽a" />
-            <span class="password-toggle" id="toggleConfirmPassword">
-              <i class="fas fa-eye"></i>
-            </span>
-          </div>
-        </label>
-        <div class="flex gap-3 pt-4">
-          <button id="btnGuardarCambioPass" class="btn btn-green flex-1">
-            <i class="fas fa-save mr-2"></i>Guardar
-          </button>
-          <button id="btnCancelarCambioPass" class="btn btn-gray flex-1">
-            <i class="fas fa-times mr-2"></i>Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-7xl mx-auto">
-
-    <!-- T铆tulo -->
-    <header class="text-center mb-8">
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 floating">
-        <i class="fas fa-clock mr-3"></i>Control de Horas
-      </h1>
-      <p class="text-xl text-white opacity-90">Sistema inteligente para gesti贸n de tiempo</p>
-      <div class="mt-4 flex items-center justify-center gap-3">
-        <button id="toggleTheme" class="btn btn-gray" aria-label="Cambiar tema claro u oscuro">
-          <i class="fas fa-adjust mr-2"></i><span id="themeText">Modo oscuro</span>
-        </button>
-        <button id="btnLogout" class="btn btn-red">
-          <i class="fas fa-sign-out-alt mr-2"></i>Salir
-        </button>
-      </div>
-    </header>
-
-    <!-- Panel -->
-    <main class="card p-8 mb-8" aria-label="Panel principal de control de horas">
-
-      <!-- Encabezado -->
-      <div class="header-gradient text-white p-6 rounded-xl mb-6 text-center">
-        <h2 class="text-3xl font-bold">
-          <i class="fas fa-user-clock mr-3"></i>Sistema de Control de Horas
-        </h2>
-        <p class="opacity-90 mt-2">Datos guardados localmente en tu navegador</p>
-      </div>
-
-      <!-- Grid principal -->
-      <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-
-        <!-- Alta -->
-        <section class="card p-6 border-2 border-green-200" aria-label="Alta de trabajador">
-          <header class="flex items-center mb-4">
-            <div class="bg-green-100 p-3 rounded-full mr-3" aria-hidden="true">
-              <i class="fas fa-user-plus text-green-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">鉃?Alta de Trabajador</h3>
-          </header>
-          <div class="space-y-4">
-            <label class="block">
-              <span class="text-sm font-medium text-gray-700">Nombre Completo</span>
-              <input id="inputNombre" type="text" maxlength="60" placeholder="Ej: Juan P茅rez" class="w-full" required aria-label="Nombre completo del trabajador" />
-            </label>
-            <label class="block">
-              <span class="text-sm font-medium text-gray-700">Documento de Identidad (DNI/NIE)</span>
-              <input id="inputDNI" type="text" maxlength="15" placeholder="Ej: 12345678Z o X1234567L" class="w-full" required aria-label="Documento de identidad del trabajador" />
-            </label>
-            <button id="btnAlta" class="btn btn-green w-full" aria-label="Dar de alta trabajador">
-              <i class="fas fa-save mr-2"></i>Dar de Alta
-            </button>
-          </div>
-        </section>
-
-        <!-- Baja -->
-        <section class="card p-6 border-2 border-red-200" aria-label="Baja de trabajador">
-          <header class="flex items-center mb-4">
-            <div class="bg-red-100 p-3 rounded-full mr-3" aria-hidden="true">
-              <i class="fas fa-user-minus text-red-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">鉃?Baja de Trabajador</h3>
-          </header>
-          <div class="space-y-4">
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-2">
-                <input type="radio" name="bajaTipo" value="numero" checked />
-                <span>N潞</span>
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input type="radio" name="bajaTipo" value="dni" />
-                <span>DNI</span>
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-sm font-medium text-gray-700">Identificador</span>
-              <input id="inputBaja" type="text" placeholder="Introduce N潞 o DNI seg煤n selecci贸n" class="w-full" aria-label="Identificador para dar de baja: n煤mero o DNI" />
-            </label>
-            <button id="btnBaja" class="btn btn-red w-full" aria-label="Dar de baja trabajador seleccionado">
-              <i class="fas fa-trash-alt mr-2"></i>Dar de Baja
-            </button>
-          </div>
-        </section>
-
-        <!-- Registro Entrada/Salida -->
-        <section class="card p-6 border-2 border-blue-200" aria-label="Registrar entrada o salida">
-          <header class="flex items-center mb-4">
-            <div class="bg-blue-100 p-3 rounded-full mr-3" aria-hidden="true">
-              <i class="fas fa-clock text-blue-600 text-xl"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">馃晸 Registrar Entrada/Salida</h3>
-          </header>
-          <div class="space-y-4">
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-2">
-                <input type="radio" name="regTipo" value="numero" checked />
-                <span>N潞</span>
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input type="radio" name="regTipo" value="dni" />
-                <span>DNI</span>
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-sm font-medium text-gray-700">Identificador</span>
-              <input id="inputRegistro" type="text" placeholder="Escribe N潞 o DNI y pulsa Enter o bot贸n" class="w-full pulse" aria-label="Identificador de trabajador: n煤mero o DNI" />
-            </label>
-            <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
-              <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-              Sin registro abierto hoy 鈫?<b>Entrada</b>. Si hay entrada sin salida 鈫?<b>Salida</b>. Permite <b>varios tramos</b> al d铆a.
-            </div>
-            <button id="btnRegistro" class="btn btn-blue w-full pressable" aria-label="Registrar ahora">
-              <i class="fas fa-fingerprint mr-2"></i>Registrar Ahora
-            </button>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- Filtros -->
-      <section class="bg-gray-50 p-6 rounded-xl mb-8" aria-label="Filtros de registros">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">
-          <i class="fas fa-filter mr-2"></i>Filtrar Registros
-        </h3>
-        <div class="grid sm:grid-cols-1 md:grid-cols-8 gap-4 items-end">
-          <label>
-            <span class="text-sm font-medium text-gray-700">Trabajador</span>
-            <select id="selectorTrabajador" class="w-full" aria-label="Selector de trabajador"></select>
-          </label>
-          <label>
-            <span class="text-sm font-medium text-gray-700">Mes</span>
-            <input type="month" id="mesSeleccionado" class="w-full" aria-label="Seleccionar mes" />
-          </label>
-          <label>
-            <span class="text-sm font-medium text-gray-700">Desde</span>
-            <input type="date" id="fDesde" class="w-full" aria-label="Fecha desde" />
-          </label>
-          <label>
-            <span class="text-sm font-medium text-gray-700">Hasta</span>
-            <input type="date" id="fHasta" class="w-full" aria-label="Fecha hasta" />
-          </label>
-          <button id="btnExportar" class="btn btn-orange w-full" aria-label="Exportar en CSV">
-            <i class="fas fa-file-export mr-2"></i>CSV
-          </button>
-          <button id="btnExportarExcel" class="btn btn-purple w-full" aria-label="Exportar en Excel">
-            <i class="fas fa-file-excel mr-2"></i>Excel
-          </button>
-          <button id="btnExportarPDF" class="btn btn-red w-full" aria-label="Exportar en PDF">
-            <i class="fas fa-file-pdf mr-2"></i>PDF
-          </button>
-          <button id="btnExportarPDFResumen" class="btn btn-green w-full" aria-label="Exportar resumen en PDF">
-            <i class="fas fa-file-alt mr-2"></i>Resumen PDF
-          </button>
-        </div>
-
-        <!-- Resumen mensual autom谩tico -->
-        <div id="resumenMensual" class="mt-4 hidden">
-          <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900">
-            <strong>Resumen del mes seleccionado:</strong>
-            <div class="mt-2 text-sm" id="resumenMensualContenido"></div>
-          </div>
-        </div>
-
-        <!-- Progreso de horas -->
-        <div id="panelProgreso" class="mt-4 hidden">
-          <h4 class="font-semibold mb-2">Progreso de horas vs objetivo</h4>
-          <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div id="barraProgreso" class="bg-emerald-500 h-3" style="width:0%"></div>
-          </div>
-          <div class="text-sm mt-1 text-gray-700">
-            <span id="textoProgreso">0 / 0 h</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Backup / Restore -->
-      <section class="bg-gray-50 p-6 rounded-xl mb-8 flex gap-4" aria-label="Copia de seguridad y restauraci贸n">
-        <button id="btnBackup" class="btn btn-gray flex-1" aria-label="Descargar copia de seguridad">
-          <i class="fas fa-download mr-2"></i>Backup
-        </button>
-        <label class="btn btn-gray flex-1 cursor-pointer" aria-label="Restaurar datos desde archivo">
-          <i class="fas fa-upload mr-2"></i>Restaurar
-          <input type="file" id="inputRestore" accept="application/json" hidden />
-        </label>
-        <button id="btnRegistroManual" class="btn btn-blue flex-1" aria-label="Registro manual de horas">
-          <i class="fas fa-edit mr-2"></i>Registro Manual
-        </button>
-        <button id="btnCambioPass" class="btn btn-purple flex-1" aria-label="Cambiar contrase帽a">
-          <i class="fas fa-key mr-2"></i>Cambiar Pass
-        </button>
-      </section>
-
-      <!-- 馃搳 Gr谩ficas -->
-      <section class="bg-gray-50 p-6 rounded-xl mb-8" aria-label="Gr谩ficas de horas">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">
-          <i class="fas fa-chart-bar mr-2"></i>Estad铆sticas
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="text-center font-bold mb-2">Horas por Semana</h4>
-            <canvas id="chartSemanal" height="200" aria-label="Gr谩fico de horas por semana"></canvas>
-          </div>
-          <div>
-            <h4 class="text-center font-bold mb-2">Horas por Mes</h4>
-            <canvas id="chartMensual" height="200" aria-label="Gr谩fico de horas por mes"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tabla -->
-      <section class="bg-gray-50 p-6 rounded-xl" aria-label="Tabla de registros">
-        <header class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">
-            <i class="fas fa-table mr-2"></i>Registro de Horas
-          </h3>
-          <div class="text-lg font-bold text-purple-700 contrast-strong">
-            Total del per铆odo: <span id="totalHoras" class="text-2xl">0.00</span> h
-          </div>
-        </header>
-        <div class="overflow-auto max-h-96 rounded-lg shadow">
-          <table id="tablaHoras" class="min-w-full bg-white">
-            <thead class="sticky top-0 bg-gray-100">
-              <tr>
-                <th>Trabajador N潞</th>
-                <th>Fecha</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-                <th>Horas (tramo)</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colspan="6" class="text-center py-8 text-gray-500">
-                  <i class="fas fa-search fa-2x mb-2" aria-hidden="true"></i>
-                  <p>Selecciona trabajador y rango/mes para ver los registros</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-</table>
-        </div>
-
-	<div id="zonaAdmin" style="display: none; margin: 40px auto; max-width: 400px; text-align: center; border: 2px dashed #ef4444; padding: 20px; border-radius: 12px; background-color: #fef2f2;">
-    <p style="color: #ef4444; font-weight: bold; margin-bottom: 15px; font-size: 14px;">
-        <i class="fas fa-exclamation-triangle"></i> ZONA DE ADMINISTRADOR
-    </p>
-    <button onclick="borrarTodoSistema()" style="background-color: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold;">
-        馃棏锔?BORRAR TODOS LOS REGISTROS
-    </button>
-</div>
-      </main>
-		
-    </main>
-
-    <!-- Footer -->
-    <footer class="text-center text-white opacity-80">
-      <p>漏 Sistema de Control de Horas</p>
-    </footer>
-  </div>
-
-  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- JS principal -->
   <script>
-    /***************************************************
-     * UTILIDADES GENERALES
-     ***************************************************/
-    const supportsLocalStorage = (() => {
-      try {
-        const k = "__tst__";
-        window.localStorage.setItem(k, "1");
-        window.localStorage.removeItem(k);
-        return true;
-      } catch {
-        return false;
-      }
-    })();
-
-    function lsSet(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-		
-// --- INICIO C脫DIGO CLOUD ---
-try {
-    if (window.dbCloud) {
-        // CORRECCI脫N: Usamos "registros_v2026" para que coincida con la descarga
-        const cloudCol = window.collection(window.dbCloud, "registros_v2026");
-
-        window.addDoc(cloudCol, {
-            // Clasifica autom谩ticamente si es la lista de nombres o un fichaje
-            tipo_dato: (key === 'trabajadores') ? "trabajadores" : "fichajes",
-            contenido: value, 
-            timestamp: new Date().toISOString(),
-            usuario: "Sistema_Gines"
-        });
-        console.log("鉁?Sincronizado en la colecci贸n registros_v2026");
-    }
-} catch (e) {
-    console.error("鉂?Error al sincronizar con la nube:", e);
-}
-// --- FIN C脫DIGO CLOUD ---
-      } catch (e) {
-        showBanner("鈿狅笍 No se pudo guardar en este navegador (localStorage).", "warning");
-        throw e;
-      }
-    }
-    function lsGet(key, fallback) {
-      try {
-        const v = localStorage.getItem(key);
-        return v ? JSON.parse(v) : fallback;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function showBanner(msg, type = "success") {
-      const banner = document.getElementById("top-banner");
-      banner.textContent = msg;
-      banner.style.background = type === "success" ? "var(--banner-bg)" :
-                                type === "error"   ? "#ef4444" :
-                                type === "warning" ? "#f59e0b" : "#3b82f6";
-      banner.hidden = false;
-      clearTimeout(showBanner._t);
-      showBanner._t = setTimeout(() => { banner.hidden = true; }, 3000);
-    }
-
-    function notify(msg, type = "info") {
-      const container = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.className = `toast ${type}`;
-      const icon = document.createElement("span");
-      icon.className = "icon";
-      icon.innerHTML = ({ success:"鉁?, error:"鉀?, warning:"鈿狅笍", info:"鈩癸笍" })[type] || "鈩癸笍";
-      const text = document.createElement("div");
-      text.textContent = msg;
-      toast.appendChild(icon);
-      toast.appendChild(text);
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.style.transform = "translateY(6px)";
-        setTimeout(() => toast.remove(), 200);
-      }, 2500);
-    }
-
-    function cryptoRandomId() {
-      if (window.crypto?.getRandomValues) {
-        const buf = new Uint32Array(2);
-        crypto.getRandomValues(buf);
-        return [...buf].map(n => n.toString(16)).join("");
-      }
-      return (Date.now().toString(16) + Math.random().toString(16).slice(2));
-    }
-
-    function formatTimeForRender(hhmmss) {
-      try {
-        const today = new Date().toISOString().slice(0,10);
-        return new Date(`${today}T${hhmmss}`).toLocaleTimeString();
-      } catch {
-        return hhmmss;
-      }
-    }
-
-    function getWeekNumber(d) {
-      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const dayNum = date.getUTCDay() || 7;
-      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
-      return Math.ceil(((date - yearStart) / 86400000 + 1)/7);
-    }
-
-    function downloadBlob(filename, mime, content) {
-      const blob = new Blob([content], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    /***************************************************
-     * AUTH
-     ***************************************************/
-    const DEFAULT_USUARIOS = {
-      admin: { password: "admin123", rol: "admin" },
-      usuario: { password: "user123", rol: "usuario" }
+    // --- LÓGICA DE USUARIOS Y LOGIN ---
+    const USUARIOS_DEFECTO = {
+        admin: { password: "admin123", rol: "admin" },
+        usuario: { password: "user123", rol: "usuario" }
     };
 
-    let usuarios = lsGet("usuarios", DEFAULT_USUARIOS);
-    let usuarioActual = null;
+    function ejecutarLogin() {
+        const u = document.getElementById("loginUser").value;
+        const p = document.getElementById("loginPass").value;
+        if (USUARIOS_DEFECTO[u] && USUARIOS_DEFECTO[u].password === p) {
+            localStorage.setItem("sesion", JSON.stringify({ nombre: u, rol: USUARIOS_DEFECTO[u].rol }));
+            location.reload();
+        } else {
+            alert("Usuario o contraseña incorrectos");
+        }
+    }
 
-    function login(usuario, password) {
-      const user = usuarios[usuario];
-      if (user && user.password === password) {
-        usuarioActual = { nombre: usuario, rol: user.rol };
-        lsSet("usuarioActual", usuarioActual);
-        document.getElementById("loginContainer").style.display = "none";
-        document.getElementById("btnRegistroManual").style.display = 
-          usuarioActual.rol === "admin" ? "block" : "none";
-        document.getElementById("btnCambioPass").style.display = 
-          usuarioActual.rol === "admin" ? "block" : "none";
-        showBanner(`鉁?Bienvenido, ${usuario} (${user.rol})`, "success");
-        return true;
-      }
-      return false;
+    function checkSesion() {
+        const sesion = JSON.parse(localStorage.getItem("sesion"));
+        if (sesion) {
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("userName").innerText = sesion.nombre;
+        }
     }
 
     function logout() {
-      usuarioActual = null;
-      lsSet("usuarioActual", null);
-      document.getElementById("loginContainer").style.display = "flex";
-      document.getElementById("loginUsuario").value = "";
-      document.getElementById("loginPassword").value = "";
-      document.getElementById("loginError").classList.add("hidden");
+        localStorage.removeItem("sesion");
+        location.reload();
     }
 
-    function cambiarPassword(usuario, nuevaPass) {
-      if (usuarios[usuario]) {
-        usuarios[usuario].password = nuevaPass;
-        lsSet("usuarios", usuarios);
-        return true;
-      }
-      return false;
-    }
+    // --- FUNCIONES DE TRABAJADORES ---
+    let trabajadores = [];
 
-    /***************************************************
-     * THEME
-     ***************************************************/
-    function applyTheme(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-      const tText = document.getElementById("themeText");
-      if (tText) tText.textContent = theme === "dark" ? "Modo claro" : "Modo oscuro";
-      lsSet("theme", theme);
-    }
-
-    /***************************************************
-     * STORAGE
-     ***************************************************/
-    if (!supportsLocalStorage) {
-      alert("Este navegador no soporta localStorage. La app no podr谩 guardar los datos.");
-    }
-
-    let trabajadores = lsGet("trabajadores", []);
-    let registros = lsGet("registros", []);
-
-    /** Persiste todo */
-    function guardarDatos() {
-      lsSet("trabajadores", trabajadores);
-      lsSet("registros", registros);
-    }
-
-    /***************************************************
-     * VALIDACIONES
-     ***************************************************/
-    function validarNombre(nombre) {
-      return !!String(nombre || "").trim();
-    }
-    
-    function validarDNI(dni) {
-      const DNI_REGEX = /^(?:\d{8}[A-Za-z]|[XYZ]\d{7}[A-Za-z])$/;
-      const val = DNI_REGEX.test(String(dni || "").toUpperCase());
-      console.log('[DEBUG validarDNI]', dni, '->', val);
-      
-      if (!val) return false;
-      
-      // Validaci贸n de letra
-      const dniStr = String(dni).toUpperCase();
-      const map = { X: 0, Y: 1, Z: 2 };
-      let num = dniStr;
-      let letra = num.slice(-1);
-      let cuerpo = num.slice(0, -1).replace(/[XYZ]/, (c) => map[c]);
-      const letras = "TRWAGMYFPDXBNJZSQVHLCKE";
-      return letras[parseInt(cuerpo, 10) % 23] === letra;
-    }
-
-    /***************************************************
-     * UI HELPERS
-     ***************************************************/
-    function actualizarSelector() {
-      const selector = document.getElementById("selectorTrabajador");
-      selector.innerHTML = '<option value="">-- Selecciona --</option>';
-      selector.innerHTML += '<option value="ALL">Todos los trabajadores</option>';
-      trabajadores.sort((a,b)=>a.numero-b.numero).forEach(t => {
-        const estado = t.estado || "Activo";
-        selector.innerHTML += `<option value="${t.id}">${t.numero} - ${t.nombre} - ${t.dni} (${estado})</option>`;
-      });
-      
-      // Actualizar selector del modal manual
-      const manualSelector = document.getElementById("manualTrabajador");
-      manualSelector.innerHTML = '';
-      trabajadores.filter(t => (t.estado || "Activo") === "Activo").forEach(t => {
-        manualSelector.innerHTML += `<option value="${t.id}">${t.numero} - ${t.nombre}</option>`;
-      });
-      
-      // Actualizar selector del modal editar
-      const editarSelector = document.getElementById("editarTrabajador");
-      editarSelector.innerHTML = '';
-      trabajadores.forEach(t => {
-        editarSelector.innerHTML += `<option value="${t.id}">${t.numero} - ${t.nombre}</option>`;
-      });
-    }
-
-    /***************************************************
-     * WORKERS
-     ***************************************************/
-   // --- FUNCIONES CORREGIDAS PARA ENVIAR AL PC 2 ---
-
-
-async function altaTrabajador(nombre, dni) {
-    // 馃洝锔?BLOQUEO DE SEGURIDAD: Evita registros vac铆os al cargar la p谩gina
-    if (!nombre || nombre === null || nombre.toString().trim() === "" || nombre === "null" || nombre === undefined) {
-        console.log('[SISTEMA] Registro vac铆o detectado. No se enviar谩 a la nube.');
-        return; 
-    }
-
-    console.log('[DEBUG altaTrabajador] nombre=', nombre, 'dni=', dni);
-
-    // Tus validaciones actuales
-    if (!validarNombre(nombre)) {
-        showBanner("鉂?El nombre no puede estar vac铆o.", "error");
-        return;
-    }
-    if (!validarDNI(dni)) {
-        showBanner("鉂?DNI/NIE no v谩lido.", "error");
-        return;
-    }
-    
-    // Comprobar si ya existe el DNI
-    if (trabajadores.some(t => String(t.dni).toUpperCase() === String(dni).toUpperCase())) {
-        showBanner("鉂?Ya existe un trabajador con ese DNI/NIE.", "error");
-        return;
-    }
-
-    // ... aqu铆 sigue tu c贸digo para guardar en Firebase (addDoc, etc.) ...
-
-    const nextNumber = trabajadores.length ? Math.max(...trabajadores.map(t => t.numero)) + 1 : 1;
-    
-    const nuevo = {
-        id: cryptoRandomId(),
-        numero: nextNumber,
-        nombre: nombre.trim(),
-        dni: String(dni).toUpperCase(),
-        estado: "Activo"
-    };
-
-    trabajadores.push(nuevo);
-    
-    // 1. Guardamos en TU ordenador
-    guardarDatos(); 
-
-    // 2. ENVIAMOS AL PC 2 (ESTO ES LO QUE FALTABA)
-    if (typeof subirDatosNube === 'function') {
-        console.log("鈽侊笍 Subiendo nuevo trabajador a la nube...");
-        await subirDatosNube('trabajadores_v2026', trabajadores);
-    }
-
-    // 3. Actualizamos la pantalla
-    if (typeof actualizarSelector === 'function') actualizarSelector();
-    if (typeof renderTabla === 'function') renderTabla(); // Para refrescar si tienes lista visible
-    
-    showBanner(`鉁?Alta: ${nuevo.nombre} (n潞 ${nuevo.numero})`, "success");
-}
-
-async function bajaTrabajador(valor, tipo) {
-    let trabajador;
-    if (tipo === "dni") {
-        trabajador = trabajadores.find(t => String(t.dni).toUpperCase() === String(valor).toUpperCase());
-    } else {
-        trabajador = trabajadores.find(t => t.numero == valor);
-    }
-
-    if (!trabajador) { showBanner("鉂?Trabajador no encontrado.", "error"); return; }
-    if (!confirm(`驴Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
-
-    trabajador.estado = "Baja";
-    
-    // 1. Guardamos en TU ordenador
-    guardarDatos();
-
-    // 2. ENVIAMOS LA BAJA AL PC 2
-    if (typeof subirDatosNube === 'function') {
-        console.log("鈽侊笍 Sincronizando baja en la nube...");
-        await subirDatosNube('trabajadores_v2026', trabajadores);
-    }
-
-    if (typeof actualizarSelector === 'function') actualizarSelector();
-    
-    showBanner(`馃洃 Baja: ${trabajador.nombre}`, "success");
-}
-
-    /***************************************************
-     * RECORDS
-     ***************************************************/
-    function buscarTrabajadorPorInput(valor, tipo) {
-      if (tipo === "dni") {
-        return trabajadores.find(t => t.dni.toUpperCase() === String(valor).toUpperCase());
-      }
-      return trabajadores.find(t => t.numero == valor);
-    }
-
-    function registrarEntradaSalida(valor, tipo) {
-      const trabajador = buscarTrabajadorPorInput(valor, tipo);
-      if (!trabajador) return showBanner("鉂?Trabajador no encontrado.", "error");
-      if ((trabajador.estado || "Activo") !== "Activo") return showBanner("馃毇 El trabajador est谩 de baja.", "warning");
-
-      const hoy = new Date().toISOString().slice(0,10);
-      let abierto = registros.find(r => r.fecha === hoy && r.trabajadorId === trabajador.id && !r.salidaISO);
-
-      if (!abierto) {
-        // Registrar entrada
-        const ahora = new Date();
-        const ahoraISO = ahora.toTimeString().slice(0,8);
-        const reg = { 
-          id: cryptoRandomId(), 
-          fecha: hoy, 
-          entradaISO: ahoraISO, 
-          salidaISO: "", 
-          horas: 0, 
-          trabajadorId: trabajador.id 
-        };
-        registros.push(reg);
-        guardarDatos();
-        refreshUI();
-        showBanner(`馃煝 Entrada registrada: ${trabajador.nombre} (n潞 ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
-      } else {
-        // Registrar salida
-        const ahora = new Date();
-        const ahoraISO = ahora.toTimeString().slice(0,8);
-        abierto.salidaISO = ahoraISO;
-        
-        // Calcular horas correctamente
-        const entrada = new Date(`${abierto.fecha}T${abierto.entradaISO}`);
-        const salida = new Date(`${abierto.fecha}T${abierto.salidaISO}`);
-        const diffMs = salida - entrada;
-        const diffHrs = diffMs / (1000 * 60 * 60);
-        const horas = Math.max(0, Math.round(diffHrs * 100) / 100);
-        abierto.horas = horas;
-        
-        guardarDatos();
-        refreshUI();
-        showBanner(`馃數 Salida registrada: ${trabajador.nombre} (n潞 ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
-      }
-    }
-
-    /***************************************************
-     * REGISTRO MANUAL
-     ***************************************************/
     function abrirModalRegistroManual() {
-      if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
-        return;
-      }
-      const modal = document.getElementById("modalRegistroManual");
-      const fechaInput = document.getElementById("manualFecha");
-      fechaInput.value = new Date().toISOString().slice(0,10);
-      modal.style.display = "flex";
+        document.getElementById("modalRegistro").classList.remove("hidden");
     }
 
     function cerrarModalRegistroManual() {
-      document.getElementById("modalRegistroManual").style.display = "none";
+        document.getElementById("modalRegistro").classList.add("hidden");
     }
 
-    function guardarRegistroManual() {
-      const trabajadorId = document.getElementById("manualTrabajador").value;
-      const fecha = document.getElementById("manualFecha").value;
-      const entrada = document.getElementById("manualEntrada").value;
-      const salida = document.getElementById("manualSalida").value;
-
-      if (!trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
-        return;
-      }
-
-      // Validar que la salida sea posterior a la entrada
-      const entradaDate = new Date(`${fecha}T${entrada}`);
-      const salidaDate = new Date(`${fecha}T${salida}`);
-      
-      if (salidaDate <= entradaDate) {
-        showBanner("鉂?La hora de salida debe ser posterior a la entrada.", "error");
-        return;
-      }
-
-      // Calcular horas
-      const diffMs = salidaDate - entradaDate;
-      const diffHrs = diffMs / (1000 * 60 * 60);
-      const horas = Math.max(0, Math.round(diffHrs * 100) / 100);
-
-      // Crear registro
-      const reg = {
-        id: cryptoRandomId(),
-        fecha: fecha,
-        entradaISO: entrada + ":00",
-        salidaISO: salida + ":00",
-        horas: horas,
-        trabajadorId: trabajadorId
-      };
-
-      registros.push(reg);
-      guardarDatos();
-      refreshUI();
-      cerrarModalRegistroManual();
-      showBanner(`鉁?Registro manual guardado correctamente.`, "success");
-    }
-
-    /***************************************************
-     * CAMBIO DE CONTRASE脩A
-     ***************************************************/
-    function abrirModalCambioPass() {
-      if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
-        return;
-      }
-      document.getElementById("modalCambioPass").style.display = "flex";
-    }
-
-    function cerrarModalCambioPass() {
-      document.getElementById("modalCambioPass").style.display = "none";
-      document.getElementById("nuevaPassword").value = "";
-      document.getElementById("confirmarPassword").value = "";
-    }
-
-    function guardarCambioPass() {
-      const usuario = document.getElementById("selectUsuarioPass").value;
-      const nuevaPass = document.getElementById("nuevaPassword").value;
-      const confirmarPass = document.getElementById("confirmarPassword").value;
-
-      if (!nuevaPass || !confirmarPass) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
-        return;
-      }
-
-      if (nuevaPass !== confirmarPass) {
-        showBanner("鉂?Las contrase帽as no coinciden.", "error");
-        return;
-      }
-
-      if (cambiarPassword(usuario, nuevaPass)) {
-        showBanner(`鉁?Contrase帽a cambiada para ${usuario}`, "success");
-        cerrarModalCambioPass();
-      } else {
-        showBanner("鉂?Error al cambiar la contrase帽a.", "error");
-      }
-    }
-
-    /***************************************************
-     * EDITAR REGISTRO
-     ***************************************************/
-    function abrirModalEditarRegistro(registroId) {
-      if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
-        return;
-      }
-      
-      const registro = registros.find(r => r.id === registroId);
-      if (!registro) return;
-
-      document.getElementById("editarRegistroId").value = registro.id;
-      document.getElementById("editarTrabajador").value = registro.trabajadorId;
-      document.getElementById("editarFecha").value = registro.fecha;
-      document.getElementById("editarEntrada").value = registro.entradaISO ? registro.entradaISO.slice(0,5) : "";
-      document.getElementById("editarSalida").value = registro.salidaISO ? registro.salidaISO.slice(0,5) : "";
-
-      document.getElementById("modalEditarRegistro").style.display = "flex";
-    }
-
-    function cerrarModalEditarRegistro() {
-      document.getElementById("modalEditarRegistro").style.display = "none";
-    }
-
-    function guardarEditarRegistro() {
-      const registroId = document.getElementById("editarRegistroId").value;
-      const trabajadorId = document.getElementById("editarTrabajador").value;
-      const fecha = document.getElementById("editarFecha").value;
-      const entrada = document.getElementById("editarEntrada").value;
-      const salida = document.getElementById("editarSalida").value;
-
-      if (!registroId || !trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
-        return;
-      }
-
-      // Validar que la salida sea posterior a la entrada
-      const entradaDate = new Date(`${fecha}T${entrada}`);
-      const salidaDate = new Date(`${fecha}T${salida}`);
-      
-      if (salidaDate <= entradaDate) {
-        showBanner("鉂?La hora de salida debe ser posterior a la entrada.", "error");
-        return;
-      }
-
-      // Calcular horas
-      const diffMs = salidaDate - entradaDate;
-      const diffHrs = diffMs / (1000 * 60 * 60);
-      const horas = Math.max(0, Math.round(diffHrs * 100) / 100);
-
-      // Actualizar registro
-      const registro = registros.find(r => r.id === registroId);
-      if (registro) {
-        registro.trabajadorId = trabajadorId;
-        registro.fecha = fecha;
-        registro.entradaISO = entrada + ":00";
-        registro.salidaISO = salida + ":00";
-        registro.horas = horas;
+    async function confirmarAlta() {
+        const n = document.getElementById("regNombre").value;
+        const d = document.getElementById("regDNI").value;
         
-        guardarDatos();
-        refreshUI();
-        cerrarModalEditarRegistro();
-        showBanner(`鉁?Registro actualizado correctamente.`, "success");
-      }
+        // 🛡️ MURALLA CONTRA REGISTROS VACÍOS
+        if (!n || n.trim() === "" || d.trim() === "") {
+            alert("Error: Nombre y DNI son obligatorios");
+            return;
+        }
+
+        await altaTrabajador(n, d);
     }
 
-    /***************************************************
-     * TOGGLE PASSWORD VISIBILITY
-     ***************************************************/
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      
-      if (input.type === "password") {
-        input.type = "text";
-        icon.innerHTML = '<i class="fas fa-eye-slash"></i>';
-      } else {
-        input.type = "password";
-        icon.innerHTML = '<i class="fas fa-eye"></i>';
-      }
-    }
-
-    /***************************************************
-     * TABLA Y EXPORTS
-     ***************************************************/
-    function obtenerDatosFiltrados() {
-      const trabajadorId = document.getElementById("selectorTrabajador").value;
-      const mes = document.getElementById("mesSeleccionado").value;
-      const desde = document.getElementById("fDesde").value;
-      const hasta = document.getElementById("fHasta").value;
-
-      let datos = [...registros];
-
-      if (trabajadorId && trabajadorId !== "ALL") datos = datos.filter(r => r.trabajadorId === trabajadorId);
-      if (desde || hasta) {
-        if (desde) datos = datos.filter(r => r.fecha >= desde);
-        if (hasta) datos = datos.filter(r => r.fecha <= hasta);
-      } else if (mes) {
-        datos = datos.filter(r => r.fecha.startsWith(mes));
-      }
-
-      return { datos, trabajadorId, mes, desde, hasta };
-    }
-
-
-function renderTabla() {
-      console.log("馃帹 Dibujando tabla de registros...");
-      const tbody = document.querySelector("#tablaHoras tbody");
-      if (!tbody) return;
-      
-      tbody.innerHTML = "";
-      
-      // Intentamos obtener los datos. Si 'obtenerDatosFiltrados' falla o est谩 vac铆o, usamos la variable global.
-      const filtrado = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
-      let datosAMostrar = filtrado.datos || [];
-      
-      // Si no hay datos en el filtro, intentamos usar la variable global fichajes
-      if (datosAMostrar.length === 0 && typeof fichajes !== 'undefined') {
-          datosAMostrar = fichajes;
-      }
-
-      const tById = new Map((typeof trabajadores !== 'undefined' ? trabajadores : []).map(t => [t.id, t]));
-
-      if (!datosAMostrar.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No hay registros</td></tr>`;
-        const totalEl = document.getElementById("totalHoras");
-        if (totalEl) totalEl.textContent = "0.00";
-        return;
-      }
-
-      let total = 0;
-
-      // --- ORDENACI脫N ROBUSTA (Corrigiendo el error localeCompare) ---
-      datosAMostrar.sort((a, b) => {
-        // Aseguramos que siempre sean cadenas de texto (si es nulo, usa "")
-        const strA = (a.fecha || "") + (a.entradaISO || "");
-        const strB = (b.fecha || "") + (b.entradaISO || "");
-        return strA.localeCompare(strB);
-      });
-
-      datosAMostrar.forEach(r => {
-        total += r.horas || 0;
-        const trabajador = tById.get(r.trabajadorId) || {};
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${trabajador.numero || ""}</td>
-          <td>${r.fecha || "-"}</td>
-          <td>${r.entradaISO ? formatTimeForRender(r.entradaISO) : ""}</td>
-          <td>${r.salidaISO ? formatTimeForRender(r.salidaISO) : ""}</td>
-          <td>${(r.horas || 0).toFixed(2)}</td>
-          <td>
-            ${(typeof usuarioActual !== 'undefined' && usuarioActual && usuarioActual.rol === "admin") ? 
-              `<button class="action-btn btn-blue" onclick="abrirModalEditarRegistro('${r.id}')">
-                <i class="fas fa-edit"></i>
-              </button>` : 
-              ""
-            }
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      const totalEl = document.getElementById("totalHoras");
-      if (totalEl) totalEl.textContent = total.toFixed(2);
-      console.log("鉁?隆Tabla pintada con 茅xito!");
-    }
-
-    /** CSV */
-    function exportCSV() {
-      const { datos } = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
-      const header = ["Trabajador N潞","Nombre","DNI","Fecha","Entrada","Salida","Horas"];
-      const lines = [header.join(";")];
-
-      const tById = new Map((typeof trabajadores !== 'undefined' ? trabajadores : []).map(t => [t.id, t]));
-      let total = 0;
-      datos.forEach(r => {
-        const t = tById.get(r.trabajadorId) || {};
-        total += r.horas || 0;
-        lines.push([
-          t.numero ?? "",
-          t.nombre ?? "",
-          t.dni ?? "",
-          r.fecha || "",
-          r.entradaISO || "",
-          r.salidaISO || "",
-          (r.horas||0).toFixed(2)
-        ].join(";"));
-      });
-      lines.push(["","","","TOTAL","","", total.toFixed(2)].join(";"));
-
-      downloadBlob(`exportacion_horas.csv`, "text/csv;charset=utf-8", lines.join("\n"));
-      if (typeof showBanner === 'function') showBanner("馃搫 CSV exportado.", "success");
-    }
-
-    /** Excel simple (HTML table -> abre en Excel) */
-    function exportExcel() {
-      const { datos, mes, desde, hasta } = obtenerDatosFiltrados();
-      const tById = new Map(trabajadores.map(t => [t.id, t]));
-      let total = 0;
-
-      let html = `
-        <table border="1">
-          <tr><th colspan="7">Registro de Horas</th></tr>
-          <tr><th>Trabajador N潞</th><th>Nombre</th><th>DNI</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th></tr>
-      `;
-      datos.sort((a,b) => (a.fecha + a.entradaISO).localeCompare(b.fecha + b.entradaISO))
-           .forEach(r => {
-            const t = tById.get(r.trabajadorId) || {};
-            total += r.horas || 0;
-            html += `<tr>
-              <td>${t.numero ?? ""}</td>
-              <td>${t.nombre ?? ""}</td>
-              <td>${t.dni ?? ""}</td>
-              <td>${r.fecha}</td>
-              <td>${r.entradaISO}</td>
-              <td>${r.salidaISO}</td>
-              <td>${(r.horas||0).toFixed(2)}</td>
-            </tr>`;
-           });
-      html += `<tr><td colspan="6"><b>Total</b></td><td><b>${total.toFixed(2)}</b></td></tr>`;
-      html += `</table>`;
-
-      const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
-      downloadBlob(`horas_${filtro}.xls`, "application/vnd.ms-excel", html);
-      showBanner("馃搳 Excel exportado.", "success");
-    }
-
-    /** PDF completo */
-    function exportPDF() {
-      const { datos, mes, desde, hasta } = obtenerDatosFiltrados();
-      const tById = new Map(trabajadores.map(t => [t.id, t]));
-      const rows = [];
-      let total = 0;
-
-      datos.sort((a,b) => (a.fecha + a.entradaISO).localeCompare(b.fecha + b.entradaISO)).forEach(r => {
-        const t = tById.get(r.trabajadorId) || {};
-        total += r.horas || 0;
-        rows.push([t.numero ?? "", t.nombre ?? "", t.dni ?? "", r.fecha, r.entradaISO, r.salidaISO, (r.horas||0).toFixed(2)]);
-      });
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      const titulo = "Registro de Horas";
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "鈥?}  Hasta: ${hasta || "鈥?}` : "Todos los registros";
-
-      doc.setFontSize(16);
-      doc.text(titulo, 14, 16);
-      doc.setFontSize(10);
-      doc.text(sub, 14, 22);
-
-      doc.autoTable({
-        head: [["N潞","Nombre","DNI","Fecha","Entrada","Salida","Horas"]],
-        body: rows,
-        startY: 28,
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [102, 126, 234] }
-      });
-
-      const y = doc.lastAutoTable.finalY + 8;
-      doc.setFontSize(12);
-      doc.text(`Total de horas: ${total.toFixed(2)} h`, 14, y);
-
-      const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
-      doc.save(`horas_${filtro}.pdf`);
-      showBanner("馃Ь PDF exportado.", "success");
-    }
-
-    /** PDF Resumen (por d铆a) */
-    function exportPDFResumen() {
-      const { datos, mes, desde, hasta } = obtenerDatosFiltrados();
-      const mapDia = {};
-      datos.forEach(r => {
-        mapDia[r.fecha] = (mapDia[r.fecha] || 0) + (r.horas || 0);
-      });
-      const rows = Object.entries(mapDia)
-        .sort((a,b)=>a[0].localeCompare(b[0]))
-        .map(([fecha, horas]) => [fecha, horas.toFixed(2)]);
-
-      const total = rows.reduce((acc, r) => acc + parseFloat(r[1]), 0);
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text("Resumen de Horas por D铆a", 14, 16);
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "鈥?}  Hasta: ${hasta || "鈥?}` : "Todos los registros";
-      doc.setFontSize(10);
-      doc.text(sub, 14, 22);
-
-      doc.autoTable({
-        head: [["Fecha","Total Horas"]],
-        body: rows,
-        startY: 28,
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [118, 75, 162] }
-      });
-
-      const y = doc.lastAutoTable.finalY + 8;
-      doc.setFontSize(12);
-      doc.text(`Total acumulado: ${total.toFixed(2)} h`, 14, y);
-
-      const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
-      doc.save(`horas_resumen_${filtro}.pdf`);
-      showBanner("馃搫 Resumen PDF exportado.", "success");
-    }
-
-    /***************************************************
-     * UI INIT & EVENTS
-     ***************************************************/
-    function refreshUI() {
-      actualizarSelector();
-      renderTabla();
-    }
-
-    // Inicializaci贸n
-    document.addEventListener("DOMContentLoaded", () => {
-      // Verificar sesi贸n
-      const savedUser = lsGet("usuarioActual", null);
-      if (savedUser) {
-        usuarioActual = savedUser;
-        document.getElementById("loginContainer").style.display = "none";
-        document.getElementById("btnRegistroManual").style.display = 
-          usuarioActual.rol === "admin" ? "block" : "none";
-        document.getElementById("btnCambioPass").style.display = 
-          usuarioActual.rol === "admin" ? "block" : "none";
-      }
-
-      // Tema
-      const savedTheme = lsGet("theme", "light");
-      applyTheme(savedTheme);
-      document.getElementById("toggleTheme").addEventListener("click", () => {
-        const current = document.documentElement.getAttribute("data-theme");
-        applyTheme(current === "dark" ? "light" : "dark");
-      });
-
-      // Eventos para el cambio de contrase帽a
-      document.getElementById("btnCambioPass").addEventListener("click", abrirModalCambioPass);
-      document.getElementById("cerrarModalCambioPass").addEventListener("click", cerrarModalCambioPass);
-      document.getElementById("btnCancelarCambioPass").addEventListener("click", cerrarModalCambioPass);
-      document.getElementById("btnGuardarCambioPass").addEventListener("click", guardarCambioPass);
-      
-      // Toggle password visibility for change password modal
-      document.getElementById("toggleNewPassword").addEventListener("click", function() {
-        togglePasswordVisibility("nuevaPassword", "toggleNewPassword");
-      });
-      document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
-        togglePasswordVisibility("confirmarPassword", "toggleConfirmPassword");
-      });
-    });
-
-// --- BLOQUE FINAL DE CONTROL: LOGIN, REGISTROS Y MODALES ---
-
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("鉁?Sistema de control de interfaz cargado.");
-
-    // 1. LOGIN Y ACCESO
-    const btnLogin = document.getElementById("btnLogin");
-    if (btnLogin) {
-        btnLogin.onclick = async () => {
-            const userEl = document.getElementById("loginUsuario");
-            const passEl = document.getElementById("loginPassword");
-            
-            if (typeof login === 'function' && login(userEl.value, passEl.value)) {
-                console.log("馃攼 Login correcto. Sincronizando datos...");
-                
-                // Descarga profunda para que el PC 1 vea lo del PC 2
-                if (typeof descargarDatosNube === 'function') {
-                    await descargarDatosNube();
-                }
-                
-                document.getElementById("loginContainer").classList.add("hidden");
-                console.log("馃殌 PC 1 actualizado y dentro.");
-            } else {
-                alert("Usuario o contrase帽a incorrectos");
-            }
-        };
-    }
-
-    // 2. VER CONTRASE脩A (EL OJO)
-    const btnOjo = document.getElementById("toggleLoginPassword");
-    if (btnOjo) {
-        btnOjo.onclick = () => {
-            const passField = document.getElementById("loginPassword");
-            if (passField) {
-                passField.type = passField.type === "password" ? "text" : "password";
-            }
-        };
-    }
-
-    // 3. LOGOUT
-    const btnLogout = document.getElementById("btnLogout");
-    if (btnLogout) {
-        btnLogout.onclick = () => {
-            if (typeof logout === 'function') logout();
-        };
-    }
-
-    // 4. REGISTRO DE ENTRADAS/SALIDAS
-    const btnRegistro = document.getElementById("btnRegistro");
-    if (btnRegistro) {
-        btnRegistro.onclick = () => {
-            const input = document.getElementById("inputRegistro");
-            const radio = document.querySelector('input[name="regTipo"]:checked');
-            if (radio && typeof registrarEntradaSalida === 'function') {
-                registrarEntradaSalida(input.value, radio.value);
-                input.value = "";
-            }
-        };
-    }
-
-    // 5. GESTI脫N DE TRABAJADORES (ALTA/BAJA)
-    const btnAlta = document.getElementById("btnAlta");
-    if (btnAlta) {
-        btnAlta.onclick = () => {
-            const n = document.getElementById("inputNombre").value;
-            const d = document.getElementById("inputDNI").value;
-            if (typeof altaTrabajador === 'function') {
-                altaTrabajador(n, d);
-                document.getElementById("inputNombre").value = "";
-                document.getElementById("inputDNI").value = "";
-            }
-        };
-    }
-
-    // 6. EXPORTACIONES
-    const vincular = (id, fn) => {
-        const el = document.getElementById(id);
-        if (el) el.onclick = fn;
-    };
-
-    vincular("btnExportar", () => typeof exportCSV === 'function' && exportCSV());
-    vincular("btnExportarExcel", () => typeof exportExcel === 'function' && exportExcel());
-    vincular("btnExportarPDF", () => typeof exportPDF === 'function' && exportPDF());
-    vincular("btnExportarPDFResumen", () => typeof exportPDFResumen === 'function' && exportPDFResumen());
-
-    // 7. MODALES Y FILTROS
-    vincular("btnRegistroManual", () => typeof abrirModalRegistroManual === 'function' && abrirModalRegistroManual());
-    vincular("cerrarModal", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-    vincular("btnCancelarManual", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-    vincular("btnGuardarManual", () => typeof guardarRegistroManual === 'function' && guardarRegistroManual());
-
-    vincular("cerrarModalEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-    vincular("btnCancelarEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-    vincular("btnGuardarEditar", () => typeof guardarEditarRegistro === 'function' && guardarEditarRegistro());
-
-    // 8. CIERRE DE MODALES AL CLICAR FUERA
-    window.onclick = (e) => {
-        const modalReg = document.getElementById("modalRegistroManual");
-        const modalEdi = document.getElementById("modalEditarRegistro");
-        const modalPass = document.getElementById("modalCambioPass");
-        
-        if (e.target === modalReg) cerrarModalRegistroManual();
-        if (e.target === modalEdi) cerrarModalEditarRegistro();
-        if (e.target === modalPass) cerrarModalCambioPass();
-    };
-
-    // Inicializar UI al cargar
-    if (typeof refreshUI === 'function') refreshUI();
-});
-
-	  async function borrarTodoSistema() {
-    // La confirmaci贸n que ped铆as
-    if (confirm("鈿狅笍 驴EST脕S SEGURO? Se borrar谩n todos los fichajes de la NUBE y de este PC definitivamente.")) {
-        
+    async function altaTrabajador(nombre, dni) {
         try {
-            const baseDatos = window.dbCloud;
-            const _collection = window.collection;
-            const _getDocs = window.getDocs;
-            const _deleteDoc = window.deleteDoc;
-            const _doc = window.doc;
-
-            // 1. Buscamos todos los documentos en la nube
-            const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
-            
-            // 2. Los borramos uno a uno
-            const promesas = snapshot.docs.map(d => _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id)));
-            await Promise.all(promesas);
-
-            // 3. Limpiamos la memoria del PC
-            localStorage.clear();
-
-            alert("鉁?Todo borrado. La p谩gina se reiniciar谩.");
-            location.reload();
-
-        } catch (error) {
-            console.error(error);
-            alert("Error al borrar. Mira la consola.");
+            // Guardamos en la nube
+            await window.addDoc(window.collection(window.dbCloud, 'registros_v2026'), {
+                nombre: nombre,
+                dni: dni,
+                fechaAlta: new Date().toLocaleDateString(),
+                timestamp: new Date().getTime()
+            });
+            alert("✅ Guardado con éxito");
+            cerrarModalRegistroManual();
+            descargarDatosNube(); // Actualiza para que el PC2 lo vea
+        } catch (e) {
+            console.error(e);
+            alert("Error al conectar con la nube");
         }
     }
-}
 
-</script>
-	</body>
+    async function descargarDatosNube() {
+        const cuerpo = document.getElementById("tablaCuerpo");
+        cuerpo.innerHTML = "<tr><td colspan='4' class='p-4 text-center'>Cargando...</td></tr>";
+
+        try {
+            const q = window.query(window.collection(window.dbCloud, 'registros_v2026'), window.orderBy("timestamp", "desc"));
+            const snapshot = await window.getDocs(q);
+            
+            cuerpo.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const t = doc.data();
+                cuerpo.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-bold text-slate-800">${t.nombre}</td>
+                        <td class="p-4">${t.dni}</td>
+                        <td class="p-4">${t.fechaAlta}</td>
+                        <td class="p-4 text-red-500 cursor-pointer" onclick="eliminarFila('${doc.id}')"><i class="fas fa-trash"></i></td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error(e);
+            cuerpo.innerHTML = "<tr><td colspan='4' class='p-4 text-center text-red-500'>Error al cargar datos</td></tr>";
+        }
+    }
+
+    async function eliminarFila(id) {
+        if (confirm("¿Eliminar este trabajador?")) {
+            await window.deleteDoc(window.doc(window.dbCloud, 'registros_v2026', id));
+            descargarDatosNube();
+        }
+    }
+
+    async function borrarTodoSistema() {
+        if (confirm("⚠️ ¿ESTÁS SEGURO? Se borrará todo en la nube y en el PC.")) {
+            const snapshot = await window.getDocs(window.collection(window.dbCloud, 'registros_v2026'));
+            const promesas = snapshot.docs.map(d => window.deleteDoc(window.doc(window.dbCloud, 'registros_v2026', d.id)));
+            await Promise.all(promesas);
+            localStorage.clear();
+            location.reload();
+        }
+    }
+  </script>
+</body>
 </html>
