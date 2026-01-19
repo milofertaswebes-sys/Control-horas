@@ -872,32 +872,28 @@ setTimeout(() => {
 
     function lsSet(key, value) {
       try {
+        // 1. Guardamos en el PC (LocalStorage)
         localStorage.setItem(key, JSON.stringify(value));
-		
-// --- INICIO CODIGO CLOUD ---
-try {
-    if (window.dbCloud && value && (Array.isArray(value) ? value.length > 0 : true)) {
-        // CORRECCION: Usamos "registros_v2026" para que coincida con la descarga
-        const cloudCol = window.collection(window.dbCloud, "registros_v2026");
 
-        window.addDoc(cloudCol, {
-            // Clasifica automAticamente si es la lista de nombres o un fichaje
-            tipo_dato: (key === 'trabajadores') ? "trabajadores" : "fichajes",
-            contenido: value, 
-            timestamp: new Date().toISOString(),
-            usuario: "Sistema_Gines"
-        });
-        console.log("?Sincronizado en la coleccin registros_v2026");
-    }
-} catch (e) {
-    console.error("?Error al sincronizar con la nube:", e);
-}
-// --- FIN CODIGO CLOUD ---
+        // 2. Sincronización limpia con la Nube
+        if (window.dbCloud && value) {
+          // Si estamos guardando registros, verificamos que tengan contenido real para no subir vacíos
+          if (key === 'registros' || key === 'fichajes') {
+             const tieneContenido = Array.isArray(value) && value.length > 0 && value.some(item => Object.keys(item).length > 0);
+             if (!tieneContenido) return; 
+          }
+
+          // Usamos la función de guardado oficial del sistema
+          if (typeof guardarDatos === 'function') {
+             guardarDatos();
+             console.log("☁️ Nube actualizada para: " + key);
+          }
+        }
       } catch (e) {
-        showBanner(" No se pudo guardar en este navegador (localStorage).", "warning");
-        throw e;
+        showBanner("No se pudo guardar en el navegador.", "warning");
       }
     }
+
     function lsGet(key, fallback) {
       try {
         const v = localStorage.getItem(key);
@@ -909,6 +905,7 @@ try {
 
     function showBanner(msg, type = "success") {
       const banner = document.getElementById("top-banner");
+      if (!banner) return;
       banner.textContent = msg;
       banner.style.background = type === "success" ? "var(--banner-bg)" :
                                 type === "error"   ? "#ef4444" :
