@@ -870,17 +870,22 @@ setTimeout(() => {
       }
     })();
 
-    function lsSet(key, value) {
+  function lsSet(key, value) {
       try {
         // 1. Guardamos en el PC (LocalStorage)
         localStorage.setItem(key, JSON.stringify(value));
 
         // 2. Sincronización limpia con la Nube
         if (window.dbCloud && value) {
-          // Si estamos guardando registros, verificamos que tengan contenido real para no subir vacíos
+          // Si estamos guardando registros o fichajes...
           if (key === 'registros' || key === 'fichajes') {
-             const tieneContenido = Array.isArray(value) && value.length > 0 && value.some(item => Object.keys(item).length > 0);
-             if (!tieneContenido) return; 
+             // MODIFICACIÓN: Comprobamos que sea una lista con datos de verdad (que tenga trabajador o ID)
+             const tieneContenidoReal = Array.isArray(value) && 
+                                        value.length > 0 && 
+                                        value.some(item => item && (item.nombre || item.trabajadorId || item.id));
+
+             // Si es una lista vacía o con objetos sin datos, no subimos nada
+             if (!tieneContenidoReal) return; 
           }
 
           // Usamos la función de guardado oficial del sistema
@@ -890,7 +895,7 @@ setTimeout(() => {
           }
         }
       } catch (e) {
-        showBanner("No se pudo guardar en el navegador.", "warning");
+        console.error("Error al guardar:", e);
       }
     }
 
