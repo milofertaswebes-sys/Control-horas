@@ -309,7 +309,17 @@
  
 <script type="module">
     // --- crea el MOTOR para tablas en Firebase ---
+	// === 1. CONFIGURACIÓN Y MÓDULOS DE FIREBASE ===
+	
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        onAuthStateChanged, 
+        signOut, 
+        createUserWithEmailAndPassword // <--- AÑADIDO PARA CREAR USUARIOS
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    
     import { 
         getFirestore, 
         collection, 
@@ -320,9 +330,10 @@
         orderBy, 
         doc, 
         getDoc, 
-        deleteDoc // <--- HE AÑADIDO ESTO AQUÍ
+        deleteDoc 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+	
+  
     const firebaseConfig = {
         apiKey: "AIzaSyCI1nLERKCHwMluF5NYbBgLuxmUbJ6REmQ",
         authDomain: "controlhorasgines.firebaseapp.com",
@@ -444,6 +455,11 @@ setTimeout(() => {
         <button id="btnLogin" class="btn btn-blue w-full">
           <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
         </button>
+		<button id="btnRegistro" class="btn w-full mt-2" style="background-color: #10b981; color: white; padding: 10px; border-radius: 8px; font-weight: bold;">
+          <i class="fas fa-user-plus mr-2"></i>Crear Nuevo Usuario
+        </button>
+		
+		
         <div id="loginError" class="text-red-500 text-sm hidden"></div>
       </div>
     </div>
@@ -990,6 +1006,27 @@ try {
       document.getElementById("loginPassword").value = "";
       document.getElementById("loginError").classList.add("hidden");
     }
+	// === NUEVA FUNCIÓN PARA CREAR USUARIOS ===
+    window.registrarNuevoUsuario = async (email, password) => {
+        try {
+            const { getAuth, createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+            const auth = getAuth();
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            alert("✅ Usuario creado con éxito: " + user.email);
+            return user;
+        } catch (error) {
+            let mensaje = "Error al crear usuario";
+            if (error.code === 'auth/email-already-in-use') mensaje = "El email ya está registrado";
+            if (error.code === 'auth/weak-password') mensaje = "La contraseña es muy débil (mínimo 6 caracteres)";
+            if (error.code === 'auth/invalid-email') mensaje = "El formato del email no es válido";
+            
+            alert("❌ " + mensaje);
+            console.error(error);
+        }
+    };
+	
+	
 
     function cambiarPassword(usuario, nuevaPass) {
       if (usuarios[usuario]) {
@@ -1696,6 +1733,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Usuario o contraseña incorrectos");
             }
         };
+		// === VÍNCULO DEL BOTÓN VERDE CON LA FUNCIÓN DE CREAR USUARIO ===
+      const btnRegistro = document.getElementById("btnRegistro");
+      if (btnRegistro) {
+          btnRegistro.onclick = async () => {
+              const userEl = document.getElementById("loginUsuario");
+              const passEl = document.getElementById("loginPassword");
+              
+              if (!userEl.value || !passEl.value) {
+                  alert("⚠️ Escribe un email y contraseña en los campos de arriba para poder crear el usuario.");
+                  return;
+              }
+              
+              // Ejecutamos la función que creamos en el Paso 2
+              await window.registrarNuevoUsuario(userEl.value, passEl.value);
+          };
+      }
+		
+		
+		
     }
 
     // 2. VER CONTRASEÑA (EL OJO)
