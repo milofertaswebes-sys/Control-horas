@@ -870,25 +870,34 @@ setTimeout(() => {
       }
     })();
 
-  function lsSet(key, value) {
+ function lsSet(key, value) {
       try {
-        // 1. Guardamos en el PC (LocalStorage)
+        // 1. Guardamos en el PC siempre
         localStorage.setItem(key, JSON.stringify(value));
 
-        // 2. Sincronización limpia con la Nube
+        // 2. Sincronización con la Nube
         if (window.dbCloud && value) {
-          // Si estamos guardando registros o fichajes...
+          
+          // CASO A: Si estamos creando o editando TRABAJADORES
+          if (key === 'trabajadores') {
+             // Los trabajadores los subimos siempre para que no se pierdan
+             if (typeof guardarDatos === 'function') {
+                guardarDatos();
+                console.log("👥 Lista de trabajadores sincronizada");
+             }
+             return; // Salimos para que no entre en el siguiente filtro
+          }
+
+          // CASO B: Si estamos guardando FICHAJES (aquí mantenemos el filtro de seguridad)
           if (key === 'registros' || key === 'fichajes') {
-             // MODIFICACIÓN: Comprobamos que sea una lista con datos de verdad (que tenga trabajador o ID)
              const tieneContenidoReal = Array.isArray(value) && 
                                         value.length > 0 && 
                                         value.some(item => item && (item.nombre || item.trabajadorId || item.id));
 
-             // Si es una lista vacía o con objetos sin datos, no subimos nada
-             if (!tieneContenidoReal) return; 
+             if (!tieneContenidoReal) return; // Si está vacío, no subimos basura
           }
 
-          // Usamos la función de guardado oficial del sistema
+          // Si pasa los filtros, guardamos
           if (typeof guardarDatos === 'function') {
              guardarDatos();
              console.log("☁️ Nube actualizada para: " + key);
@@ -898,7 +907,6 @@ setTimeout(() => {
         console.error("Error al guardar:", e);
       }
     }
-
     function lsGet(key, fallback) {
       try {
         const v = localStorage.getItem(key);
