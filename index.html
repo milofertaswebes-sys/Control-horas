@@ -1059,9 +1059,14 @@ try {
 
  /** Persiste todo */
     function guardarDatos() {
-      lsSet("trabajadores", trabajadores);
-      // Solo guardamos registros si hay alguno, as evitamos los vacos al inicio
-      if (registros && registros.length > 0) {
+      // Solo guarda si hay trabajadores reales
+      if (trabajadores && trabajadores.length > 0) {
+        lsSet("trabajadores", trabajadores);
+      }
+      
+      // SOLO guarda registros si tienen contenido real (id y trabajadorId)
+      // Esto evita que al actualizar se creen filas con "-"
+      if (registros && registros.length > 0 && registros[0].id) {
         lsSet("registros", registros);
       }
     }
