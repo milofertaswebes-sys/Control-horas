@@ -382,7 +382,7 @@
         const baseDatos = window.dbCloud || db;
 
         if (!_getDocs || !_collection) {
-            console.error("�?No tengo las herramientas de lectura");
+            console.error("?No tengo las herramientas de lectura");
             return;
         }
 
@@ -413,7 +413,7 @@
                 registros = datosRecuperados;
             }
             
-            console.log(`�?¡ÉXITO! Se han recuperado ${datosRecuperados.length} registros.`);
+            console.log(`?¡ÉXITO! Se han recuperado ${datosRecuperados.length} registros.`);
         }
 
         // 3. ACTUALIZAR PANTALLA
@@ -421,7 +421,7 @@
         else if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
 
     } catch (error) {
-        console.error("�?Error en la descarga profunda:", error);
+        console.error("?Error en la descarga profunda:", error);
     }
 }
 	  
@@ -468,7 +468,7 @@ setTimeout(() => {
   <div id="modalRegistroManual" class="modal">
     <div class="modal-content p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">�?Registro Manual de Horas</h3>
+        <h3 class="text-xl font-bold">?Registro Manual de Horas</h3>
         <button id="cerrarModal" class="text-2xl">&times;</button>
       </div>
       <div class="space-y-4">
@@ -623,7 +623,7 @@ setTimeout(() => {
             <div class="bg-green-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-user-plus text-green-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">�?Alta de Trabajador</h3>
+            <h3 class="text-xl font-bold text-gray-800">?Alta de Trabajador</h3>
           </header>
           <div class="space-y-4">
             <label class="block">
@@ -646,7 +646,7 @@ setTimeout(() => {
             <div class="bg-red-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-user-minus text-red-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">�?Baja de Trabajador</h3>
+            <h3 class="text-xl font-bold text-gray-800">?Baja de Trabajador</h3>
           </header>
           <div class="space-y-4">
             <div class="flex items-center gap-3">
@@ -675,7 +675,7 @@ setTimeout(() => {
             <div class="bg-blue-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-clock text-blue-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">🕓 Registrar Entrada/Salida</h3>
+            <h3 class="text-xl font-bold text-gray-800">恭敬 Registrar Entrada/Salida</h3>
           </header>
           <div class="space-y-4">
             <div class="flex items-center gap-3">
@@ -694,7 +694,7 @@ setTimeout(() => {
             </label>
             <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
               <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-              Sin registro abierto hoy �?<b>Entrada</b>. Si hay entrada sin salida �?<b>Salida</b>. Permite <b>varios tramos</b> al día.
+              Sin registro abierto hoy ?<b>Entrada</b>. Si hay entrada sin salida ?<b>Salida</b>. Permite <b>varios tramos</b> al día.
             </div>
             <button id="btnRegistro" class="btn btn-blue w-full pressable" aria-label="Registrar ahora">
               <i class="fas fa-fingerprint mr-2"></i>Registrar Ahora
@@ -836,7 +836,7 @@ setTimeout(() => {
         <i class="fas fa-exclamation-triangle"></i> ZONA DE ADMINISTRADOR
     </p>
     <button onclick="borrarTodoSistema()" style="background-color: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold;">
-        🗑�?BORRAR TODOS LOS REGISTROS
+        🗑?BORRAR TODOS LOS REGISTROS
     </button>
 </div>
       </main>
@@ -884,7 +884,7 @@ try {
             timestamp: new Date().toISOString(),
             usuario: "Sistema_Gines"
         });
-        console.log("?Sincronizado en la colecci��n registros_v2026");
+        console.log("?Sincronizado en la coleccin registros_v2026");
     }
 } catch (e) {
     console.error("?Error al sincronizar con la nube:", e);
@@ -921,7 +921,7 @@ try {
       toast.className = `toast ${type}`;
       const icon = document.createElement("span");
       icon.className = "icon";
-      icon.innerHTML = ({ success:"�?, error:"�?, warning:"⚠️", info:"ℹ️" })[type] || "ℹ️";
+      icon.innerHTML = ({ success:"?", error:"?", warning:"⚠️", info:"ℹ️" })[type] || "ℹ️";
       const text = document.createElement("div");
       text.textContent = msg;
       toast.appendChild(icon);
@@ -992,7 +992,7 @@ try {
           usuarioActual.rol === "admin" ? "block" : "none";
         document.getElementById("btnCambioPass").style.display = 
           usuarioActual.rol === "admin" ? "block" : "none";
-        showBanner(`�?Bienvenido, ${usuario} (${user.rol})`, "success");
+        showBanner(`?Bienvenido, ${usuario} (${user.rol})`, "success");
         return true;
       }
       return false;
@@ -1013,7 +1013,7 @@ try {
             const auth = getAuth();
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            alert("�?Usuario creado con éxito: " + user.email);
+            alert("?Usuario creado con éxito: " + user.email);
             return user;
         } catch (error) {
             let mensaje = "Error al crear usuario";
@@ -1021,7 +1021,7 @@ try {
             if (error.code === 'auth/weak-password') mensaje = "La contraseña es muy débil (mínimo 6 caracteres)";
             if (error.code === 'auth/invalid-email') mensaje = "El formato del email no es válido";
             
-            alert("�?" + mensaje);
+            alert("?" + mensaje);
             console.error(error);
         }
     };
@@ -1060,7 +1060,7 @@ try {
  /** Persiste todo */
     function guardarDatos() {
       lsSet("trabajadores", trabajadores);
-      // Solo guardamos registros si hay alguno, as�� evitamos los vac��os al inicio
+      // Solo guardamos registros si hay alguno, as evitamos los vacos al inicio
       if (registros && registros.length > 0) {
         lsSet("registros", registros);
       }
@@ -1124,7 +1124,7 @@ try {
 
 
 async function altaTrabajador(nombre, dni) {
-    // 🛡�?BLOQUEO DE SEGURIDAD: Evita registros vacíos al cargar la página
+    // 🛡?BLOQUEO DE SEGURIDAD: Evita registros vacíos al cargar la página
     if (!nombre || nombre === null || nombre.toString().trim() === "" || nombre === "null" || nombre === undefined) {
         console.log('[SISTEMA] Registro vacío detectado. No se enviará a la nube.');
         return; 
@@ -1134,11 +1134,11 @@ async function altaTrabajador(nombre, dni) {
 
     // Tus validaciones actuales
     if (!validarNombre(nombre)) {
-        showBanner("�?El nombre no puede estar vacío.", "error");
+        showBanner("?El nombre no puede estar vacío.", "error");
         return;
     }
     if (!validarDNI(dni)) {
-        showBanner("�?DNI/NIE no válido.", "error");
+        showBanner("?DNI/NIE no válido.", "error");
         return;
     }
     
@@ -1175,7 +1175,7 @@ async function altaTrabajador(nombre, dni) {
     if (typeof actualizarSelector === 'function') actualizarSelector();
     if (typeof renderTabla === 'function') renderTabla(); // Para refrescar si tienes lista visible
     
-    showBanner(`�?Alta: ${nuevo.nombre} (nº ${nuevo.numero})`, "success");
+    showBanner(`?Alta: ${nuevo.nombre} (nº ${nuevo.numero})`, "success");
 }
 
 async function bajaTrabajador(valor, tipo) {
@@ -1186,7 +1186,7 @@ async function bajaTrabajador(valor, tipo) {
         trabajador = trabajadores.find(t => t.numero == valor);
     }
 
-    if (!trabajador) { showBanner("�?Trabajador no encontrado.", "error"); return; }
+    if (!trabajador) { showBanner("?Trabajador no encontrado.", "error"); return; }
     if (!confirm(`¿Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
 
     trabajador.estado = "Baja";
@@ -1217,7 +1217,7 @@ async function bajaTrabajador(valor, tipo) {
 
     function registrarEntradaSalida(valor, tipo) {
       const trabajador = buscarTrabajadorPorInput(valor, tipo);
-      if (!trabajador) return showBanner("�?Trabajador no encontrado.", "error");
+      if (!trabajador) return showBanner("?Trabajador no encontrado.", "error");
       if ((trabajador.estado || "Activo") !== "Activo") return showBanner("🚫 El trabajador está de baja.", "warning");
 
       const hoy = new Date().toISOString().slice(0,10);
@@ -1284,7 +1284,7 @@ async function bajaTrabajador(valor, tipo) {
       const salida = document.getElementById("manualSalida").value;
 
       if (!trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("�?Todos los campos son obligatorios.", "error");
+        showBanner("?Todos los campos son obligatorios.", "error");
         return;
       }
 
@@ -1293,7 +1293,7 @@ async function bajaTrabajador(valor, tipo) {
       const salidaDate = new Date(`${fecha}T${salida}`);
       
       if (salidaDate <= entradaDate) {
-        showBanner("�?La hora de salida debe ser posterior a la entrada.", "error");
+        showBanner("?La hora de salida debe ser posterior a la entrada.", "error");
         return;
       }
 
@@ -1316,7 +1316,7 @@ async function bajaTrabajador(valor, tipo) {
       guardarDatos();
       refreshUI();
       cerrarModalRegistroManual();
-      showBanner(`�?Registro manual guardado correctamente.`, "success");
+      showBanner(`?Registro manual guardado correctamente.`, "success");
     }
 
     /***************************************************
@@ -1342,20 +1342,20 @@ async function bajaTrabajador(valor, tipo) {
       const confirmarPass = document.getElementById("confirmarPassword").value;
 
       if (!nuevaPass || !confirmarPass) {
-        showBanner("�?Todos los campos son obligatorios.", "error");
+        showBanner("?Todos los campos son obligatorios.", "error");
         return;
       }
 
       if (nuevaPass !== confirmarPass) {
-        showBanner("�?Las contraseñas no coinciden.", "error");
+        showBanner("?Las contraseñas no coinciden.", "error");
         return;
       }
 
       if (cambiarPassword(usuario, nuevaPass)) {
-        showBanner(`�?Contraseña cambiada para ${usuario}`, "success");
+        showBanner(`?Contraseña cambiada para ${usuario}`, "success");
         cerrarModalCambioPass();
       } else {
-        showBanner("�?Error al cambiar la contraseña.", "error");
+        showBanner("?Error al cambiar la contraseña.", "error");
       }
     }
 
@@ -1392,7 +1392,7 @@ async function bajaTrabajador(valor, tipo) {
       const salida = document.getElementById("editarSalida").value;
 
       if (!registroId || !trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("�?Todos los campos son obligatorios.", "error");
+        showBanner("?Todos los campos son obligatorios.", "error");
         return;
       }
 
@@ -1401,7 +1401,7 @@ async function bajaTrabajador(valor, tipo) {
       const salidaDate = new Date(`${fecha}T${salida}`);
       
       if (salidaDate <= entradaDate) {
-        showBanner("�?La hora de salida debe ser posterior a la entrada.", "error");
+        showBanner("?La hora de salida debe ser posterior a la entrada.", "error");
         return;
       }
 
@@ -1422,7 +1422,7 @@ async function bajaTrabajador(valor, tipo) {
         guardarDatos();
         refreshUI();
         cerrarModalEditarRegistro();
-        showBanner(`�?Registro actualizado correctamente.`, "success");
+        showBanner(`?Registro actualizado correctamente.`, "success");
       }
     }
 
@@ -1524,7 +1524,7 @@ function renderTabla() {
 
       const totalEl = document.getElementById("totalHoras");
       if (totalEl) totalEl.textContent = total.toFixed(2);
-      console.log("�?¡Tabla pintada con éxito!");
+      console.log("?¡Tabla pintada con éxito!");
     }
 
     /** CSV */
@@ -1604,7 +1604,7 @@ function renderTabla() {
       const doc = new jsPDF();
 
       const titulo = "Registro de Horas";
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "�?}  Hasta: ${hasta || "�?}` : "Todos los registros";
+      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "?"}  Hasta: ${hasta || "?"}` : "Todos los registros";
 
       doc.setFontSize(16);
       doc.text(titulo, 14, 16);
@@ -1645,7 +1645,7 @@ function renderTabla() {
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text("Resumen de Horas por Día", 14, 16);
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "�?}  Hasta: ${hasta || "�?}` : "Todos los registros";
+      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "?"}  Hasta: ${hasta || "?"}` : "Todos los registros";
       doc.setFontSize(10);
       doc.text(sub, 14, 22);
 
@@ -1733,7 +1733,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("loginContainer").classList.add("hidden");
                 console.log("🚀 PC 1 actualizado y dentro.");
             } else {
-                alert("Usuario o contraseña incorrectos");
+                document.getElementById("loginError").textContent = "Usuario o contraseña incorrectos";
+                document.getElementById("loginError").classList.remove("hidden");
             }
         };
 		// === VÍNCULO DEL BOTÓN VERDE CON LA FUNCIÓN DE CREAR USUARIO ===
@@ -1841,7 +1842,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	  async function borrarTodoSistema() {
     // La confirmación que pedías
-    if (confirma("ESTAS SEGURO? Se borraran todos los fichajes de la NUBE y de este PC definitivamente.")) {
+    if (confirm("ESTAS SEGURO? Se borraran todos los fichajes de la NUBE y de este PC definitivamente.")) {
         
         try {
             const baseDatos = window.dbCloud;
@@ -1860,7 +1861,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 3. Limpiamos la memoria del PC
             localStorage.clear();
 
-            alert("�?Todo borrado. La página se reiniciará.");
+            alert("?Todo borrado. La página se reiniciará.");
             location.reload();
 
         } catch (error) {
