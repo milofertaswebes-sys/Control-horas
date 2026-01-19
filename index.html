@@ -1808,92 +1808,93 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // 5. GESTIÓN DE TRABAJADORES (ALTA/BAJA)
-    const btnAlta = document.getElementById("btnAlta");
-    if (btnAlta) {
-        btnAlta.onclick = () => {
-            const n = document.getElementById("inputNombre").value;
-            const d = document.getElementById("inputDNI").value;
-            if (typeof altaTrabajador === 'function') {
-                altaTrabajador(n, d);
-                document.getElementById("inputNombre").value = "";
-                document.getElementById("inputDNI").value = "";
-            }
-        };
-    }
-
-    // 6. EXPORTACIONES
-    const vincular = (id, fn) => {
-        const el = document.getElementById(id);
-        if (el) el.onclick = fn;
-    };
-
-    vincular("btnExportar", () => typeof exportCSV === 'function' && exportCSV());
-    vincular("btnExportarExcel", () => typeof exportExcel === 'function' && exportExcel());
-    vincular("btnExportarPDF", () => typeof exportPDF === 'function' && exportPDF());
-    vincular("btnExportarPDFResumen", () => typeof exportPDFResumen === 'function' && exportPDFResumen());
-
-    // 7. MODALES Y FILTROS
-    vincular("btnRegistroManual", () => typeof abrirModalRegistroManual === 'function' && abrirModalRegistroManual());
-    vincular("cerrarModal", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-    vincular("btnCancelarManual", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-    vincular("btnGuardarManual", () => typeof guardarRegistroManual === 'function' && guardarRegistroManual());
-
-    vincular("cerrarModalEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-    vincular("btnCancelarEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-    vincular("btnGuardarEditar", () => typeof guardarEditarRegistro === 'function' && guardarEditarRegistro());
-
-    // 8. CIERRE DE MODALES AL CLICAR FUERA
-    window.onclick = (e) => {
-        const modalReg = document.getElementById("modalRegistroManual");
-        const modalEdi = document.getElementById("modalEditarRegistro");
-        const modalPass = document.getElementById("modalCambioPass");
-        
-        if (e.target === modalReg) cerrarModalRegistroManual();
-        if (e.target === modalEdi) cerrarModalEditarRegistro();
-        if (e.target === modalPass) cerrarModalCambioPass();
-    };
-
-    // Inicializar UI al cargar
- // Le damos 1 segundo a la nube para que descargue antes de dibujar la tabla
-    setTimeout(() => {
-        if (typeof refreshUI === 'function') refreshUI();
-    }, 1000);
-});
-	  async function borrarTodoSistema() {
-    // La confirmación que pedías
-    if (confirm("ESTAS SEGURO? Se borraran todos los fichajes de la NUBE y de este PC definitivamente.")) {
-        
-        try {
-            const baseDatos = window.dbCloud;
-            const _collection = window.collection;
-            const _getDocs = window.getDocs;
-            const _deleteDoc = window.deleteDoc;
-            const _doc = window.doc;
-
-            // 1. Buscamos todos los documentos en la nube
-            const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
-            
-            // 2. Los borramos uno a uno
-            const promesas = snapshot.docs.map(d => _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id)));
-            await Promise.all(promesas);
-
-            // 3. Limpiamos la memoria del PC
-           localStorage.removeItem("registros");
-localStorage.removeItem("fichajes");
-
-            alert("?Todo borrado. La página se reiniciará.");
-            location.reload();
-
-        } catch (error) {
-            console.error(error);
-            alert("Error al borrar. Mira la consola.");
+// 5. GESTIÓN DE TRABAJADORES (ALTA/BAJA)
+const btnAlta = document.getElementById("btnAlta");
+if (btnAlta) {
+    btnAlta.onclick = () => {
+        const n = document.getElementById("inputNombre").value;
+        const d = document.getElementById("inputDNI").value;
+        if (typeof altaTrabajador === 'function') {
+            altaTrabajador(n, d);
+            document.getElementById("inputNombre").value = "";
+            document.getElementById("inputDNI").value = "";
+            // Forzamos el guardado en la nube tras el alta
+            if (typeof guardarDatos === 'function') guardarDatos();
         }
+    };
+}
+
+// 6. EXPORTACIONES
+const vincular = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = fn;
+};
+
+vincular("btnExportar", () => typeof exportCSV === 'function' && exportCSV());
+vincular("btnExportarExcel", () => typeof exportExcel === 'function' && exportExcel());
+vincular("btnExportarPDF", () => typeof exportPDF === 'function' && exportPDF());
+vincular("btnExportarPDFResumen", () => typeof exportPDFResumen === 'function' && exportPDFResumen());
+
+// 7. MODALES Y FILTROS
+vincular("btnRegistroManual", () => typeof abrirModalRegistroManual === 'function' && abrirModalRegistroManual());
+vincular("cerrarModal", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
+vincular("btnCancelarManual", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
+vincular("btnGuardarManual", () => typeof guardarRegistroManual === 'function' && guardarRegistroManual());
+
+vincular("cerrarModalEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
+vincular("btnCancelarEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
+vincular("btnGuardarEditar", () => typeof guardarEditarRegistro === 'function' && guardarEditarRegistro());
+
+// 8. CIERRE DE MODALES AL CLICAR FUERA
+window.onclick = (e) => {
+    const modalReg = document.getElementById("modalRegistroManual");
+    const modalEdi = document.getElementById("modalEditarRegistro");
+    const modalPass = document.getElementById("modalCambioPass");
+    
+    if (e.target === modalReg) cerrarModalRegistroManual();
+    if (e.target === modalEdi) cerrarModalEditarRegistro();
+    if (e.target === modalPass) cerrarModalCambioPass();
+};
+
+// Inicializar UI al cargar
+setTimeout(() => {
+    if (typeof refreshUI === 'function') refreshUI();
+}, 1000);
+
+// --- FUNCIÓN DE GUARDADO CORREGIDA (Línea 1869 aprox) ---
+async function guardarDatos() {
+    if (!window.dbCloud) return;
+    try {
+        const baseDatos = window.dbCloud;
+        const _collection = window.collection;
+        const _addDoc = window.addDoc;
+
+        // A. Sincronizar Trabajadores
+        const trabajadores = JSON.parse(localStorage.getItem("trabajadores") || "[]");
+        if (trabajadores.length > 0) {
+            await _addDoc(_collection(baseDatos, 'trabajadores_v2026'), {
+                data: trabajadores,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // B. Sincronizar Fichajes
+        const fichajes = JSON.parse(localStorage.getItem("fichajes") || "[]");
+        if (fichajes.length > 0) {
+            await _addDoc(_collection(baseDatos, 'registros_v2026'), {
+                data: fichajes,
+                timestamp: new Date().toISOString()
+            });
+        }
+        console.log("✅ Nube sincronizada (Trabajadores y Fichajes)");
+    } catch (error) {
+        console.error("❌ Error al guardar en nube:", error);
     }
 }
 
+// --- FUNCIÓN DE BORRADO UNIFICADA (Línea 1899 aprox) ---
 async function borrarTodoSistema() {
-    if (confirm("¿ESTÁS SEGURO? Se borrarán los fichajes de la NUBE y del PC, pero mantendremos tu contraseña.")) {
+    if (confirm("¿ESTÁS SEGURO? Se borrarán los fichajes de la NUBE y del PC definitivamente.")) {
         try {
             const baseDatos = window.dbCloud;
             const _collection = window.collection;
@@ -1901,23 +1902,32 @@ async function borrarTodoSistema() {
             const _deleteDoc = window.deleteDoc;
             const _doc = window.doc;
 
-            // 1. Limpiar Nube
+            // 1. Limpiar Nube (Registros)
             const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
-            const promesas = snapshot.docs.map(d => _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id)));
-            await Promise.all(promesas);
+            for (const d of snapshot.docs) {
+                await _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id));
+            }
 
-            // 2. Limpiar PC (Solo registros, NO la contraseña)
+            // 2. Limpiar Nube (Trabajadores - Opcional, quítalo si quieres mantenerlos)
+            const snapTrab = await _getDocs(_collection(baseDatos, 'trabajadores_v2026'));
+            for (const d of snapTrab.docs) {
+                await _deleteDoc(_doc(baseDatos, 'trabajadores_v2026', d.id));
+            }
+
+            // 3. Limpiar PC
             localStorage.removeItem("registros");
             localStorage.removeItem("fichajes");
+            localStorage.removeItem("trabajadores");
 
-            alert("Sistema limpio. La página se recargará.");
+            alert("Sistema reseteado con éxito.");
             location.reload();
         } catch (error) {
             console.error(error);
-            alert("Error al borrar. Mira la consola.");
+            alert("Error al borrar. Revisa la consola.");
         }
     }
-}	  
+}
+  
 </script>
 	</body>
 </html>
