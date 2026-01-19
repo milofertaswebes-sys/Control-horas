@@ -17,7 +17,7 @@
     :root {
       --bg-grad-start: #1e3c72;
       --bg-grad-end: #2a5298;
-      --text-contrast-strong: #4c1d95; /* p煤rpura m谩s oscuro para contraste */
+      --text-contrast-strong: #4c1d95; /* púrpura más oscuro para contraste */
       --banner-bg: #10b981; /* verde */
       --banner-text: #053b2f;
     }
@@ -112,7 +112,7 @@
     html[data-theme="dark"] td { border-bottom-color: #374151; }
     html[data-theme="dark"] tr:nth-child(even) td { background: #111827; }
 
-    /* Primera columna sticky (para m贸viles) */
+    /* Primera columna sticky (para móviles) */
     #tablaHoras th:first-child,
     #tablaHoras td:first-child {
       position: sticky;
@@ -250,7 +250,7 @@
       z-index: 10002;
     }
 
-    /* Ojo de contrase帽a */
+    /* Ojo de contraseña */
     .password-toggle {
       position: absolute;
       right: 10px;
@@ -264,7 +264,7 @@
       width: 100%;
     }
 
-    /* Botones de acci贸n en tabla */
+    /* Botones de acción en tabla */
     .action-btn {
       padding: 0.25rem 0.5rem;
       border-radius: 0.375rem;
@@ -272,7 +272,7 @@
       margin: 0 0.125rem;
     }
 
-    /* Modal Cambio de Contrase帽a */
+    /* Modal Cambio de Contraseña */
     .modal-password {
       display: none;
       position: fixed;
@@ -309,7 +309,7 @@
  
 <script type="module">
     // --- crea el MOTOR para tablas en Firebase ---
-	// === 1. CONFIGURACI脫N Y M脫DULOS DE FIREBASE ===
+	// === 1. CONFIGURACIÓN Y MÓDULOS DE FIREBASE ===
 	
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
@@ -317,7 +317,7 @@
         signInWithEmailAndPassword, 
         onAuthStateChanged, 
         signOut, 
-        createUserWithEmailAndPassword // <--- A脩ADIDO PARA CREAR USUARIOS
+        createUserWithEmailAndPassword // <--- AÑADIDO PARA CREAR USUARIOS
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     
     import { 
@@ -343,11 +343,11 @@
         appId: "1:32537920791:web:d1852e2e6220e71913a352"
     };
 
- // 1. Inicializaci贸n de Firebase (Limpia y sin repeticiones)
+ // 1. Inicialización de Firebase (Limpia y sin repeticiones)
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 2. Detector de Administrador (Espera a que la p谩gina cargue)
+    // 2. Detector de Administrador (Espera a que la página cargue)
     window.addEventListener('load', () => {
         const valoresURL = new URLSearchParams(window.location.search);
         if (valoresURL.get('admin') === 'true') {
@@ -358,7 +358,7 @@
         }
     });
 
-    // 3. Conexi贸n de funciones con el sistema (Necesario para el bot贸n de borrar)
+    // 3. Conexión de funciones con el sistema (Necesario para el botón de borrar)
     window.dbCloud = db;
     window.addDoc = addDoc;
     window.collection = collection;
@@ -369,10 +369,10 @@
     window.getDoc = getDoc;
     window.deleteDoc = deleteDoc;
 
-// --- L脥NEA 335: NUEVA FUNCI脫N DE DESCARGA AUT脫NOMA ---
+// --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
 
 	  async function descargarDatosNube() {
-    console.log("馃摗 [PC 1] Descargando registros individuales de la nube...");
+    console.log("📡 [PC 1] Descargando registros individuales de la nube...");
 
     try {
         const _collection = window.collection;
@@ -382,7 +382,7 @@
         const baseDatos = window.dbCloud || db;
 
         if (!_getDocs || !_collection) {
-            console.error("鉂?No tengo las herramientas de lectura");
+            console.error("�?No tengo las herramientas de lectura");
             return;
         }
 
@@ -396,13 +396,13 @@
             if (data.data && Array.isArray(data.data)) {
                 datosRecuperados = datosRecuperados.concat(data.data);
             } else {
-                // Si el documento es el registro directo, lo a帽adimos
+                // Si el documento es el registro directo, lo añadimos
                 datosRecuperados.push(data);
             }
         });
 
         if (datosRecuperados.length > 0) {
-            // --- AQU脥 EVITAMOS EL ERROR ---
+            // --- AQUÍ EVITAMOS EL ERROR ---
             // Guardamos en LocalStorage directamente para que persista
             localStorage.setItem('fichajes', JSON.stringify(datosRecuperados));
             
@@ -413,7 +413,7 @@
                 registros = datosRecuperados;
             }
             
-            console.log(`鉁?隆脡XITO! Se han recuperado ${datosRecuperados.length} registros.`);
+            console.log(`�?¡ÉXITO! Se han recuperado ${datosRecuperados.length} registros.`);
         }
 
         // 3. ACTUALIZAR PANTALLA
@@ -421,11 +421,11 @@
         else if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
 
     } catch (error) {
-        console.error("鉂?Error en la descarga profunda:", error);
+        console.error("�?Error en la descarga profunda:", error);
     }
 }
 	  
-// --- INICIO AUTOM脕TICO ---
+// --- INICIO AUTOMÁTICO ---
 setTimeout(() => {
     descargarDatosNube();
 }, 2000);
@@ -437,14 +437,14 @@ setTimeout(() => {
 
   <div id="loginContainer" class="login-container">
     <div class="card p-8 max-w-md w-full">
-      <h2 class="text-2xl font-bold text-center mb-6">馃攼 Acceso al Sistema</h2>
+      <h2 class="text-2xl font-bold text-center mb-6">🔐 Acceso al Sistema</h2>
       <div class="space-y-4">
         <label class="block">
           <span class="text-sm font-medium">Usuario</span>
           <input type="text" id="loginUsuario" class="w-full mt-1" placeholder="admin o usuario" />
         </label>
         <label class="block">
-          <span class="text-sm font-medium">Contrase帽a</span>
+          <span class="text-sm font-medium">Contraseña</span>
           <div class="password-container">
             <input type="password" id="loginPassword" class="w-full mt-1" placeholder="admin123 o user123" />
             <span class="password-toggle" id="toggleLoginPassword">
@@ -453,7 +453,7 @@ setTimeout(() => {
           </div>
         </label>
         <button id="btnLogin" class="btn btn-blue w-full">
-          <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesi贸n
+          <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
         </button>
 		<button id="btnRegistro" class="btn w-full mt-2" style="background-color: #10b981; color: white; padding: 10px; border-radius: 8px; font-weight: bold;">
           <i class="fas fa-user-plus mr-2"></i>Crear Nuevo Usuario
@@ -468,7 +468,7 @@ setTimeout(() => {
   <div id="modalRegistroManual" class="modal">
     <div class="modal-content p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">鉃?Registro Manual de Horas</h3>
+        <h3 class="text-xl font-bold">�?Registro Manual de Horas</h3>
         <button id="cerrarModal" class="text-2xl">&times;</button>
       </div>
       <div class="space-y-4">
@@ -505,7 +505,7 @@ setTimeout(() => {
   <div id="modalEditarRegistro" class="modal">
     <div class="modal-content p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">鉁忥笍 Editar Registro</h3>
+        <h3 class="text-xl font-bold">✏️ Editar Registro</h3>
         <button id="cerrarModalEditar" class="text-2xl">&times;</button>
       </div>
       <div class="space-y-4">
@@ -540,11 +540,11 @@ setTimeout(() => {
     </div>
   </div>
 
-  <!-- Modal para cambio de contrase帽a -->
+  <!-- Modal para cambio de contraseña -->
   <div id="modalCambioPass" class="modal-password">
     <div class="modal-password-content p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">馃攽 Cambiar Contrase帽a</h3>
+        <h3 class="text-xl font-bold">🔑 Cambiar Contraseña</h3>
         <button id="cerrarModalCambioPass" class="text-2xl">&times;</button>
       </div>
       <div class="space-y-4">
@@ -556,18 +556,18 @@ setTimeout(() => {
           </select>
         </label>
         <label class="block">
-          <span class="text-sm font-medium">Nueva Contrase帽a</span>
+          <span class="text-sm font-medium">Nueva Contraseña</span>
           <div class="password-container">
-            <input type="password" id="nuevaPassword" class="w-full mt-1" placeholder="Introduce nueva contrase帽a" />
+            <input type="password" id="nuevaPassword" class="w-full mt-1" placeholder="Introduce nueva contraseña" />
             <span class="password-toggle" id="toggleNewPassword">
               <i class="fas fa-eye"></i>
             </span>
           </div>
         </label>
         <label class="block">
-          <span class="text-sm font-medium">Confirmar Contrase帽a</span>
+          <span class="text-sm font-medium">Confirmar Contraseña</span>
           <div class="password-container">
-            <input type="password" id="confirmarPassword" class="w-full mt-1" placeholder="Confirma la nueva contrase帽a" />
+            <input type="password" id="confirmarPassword" class="w-full mt-1" placeholder="Confirma la nueva contraseña" />
             <span class="password-toggle" id="toggleConfirmPassword">
               <i class="fas fa-eye"></i>
             </span>
@@ -587,12 +587,12 @@ setTimeout(() => {
 
   <div class="max-w-7xl mx-auto">
 
-    <!-- T铆tulo -->
+    <!-- Título -->
     <header class="text-center mb-8">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 floating">
         <i class="fas fa-clock mr-3"></i>Control de Horas
       </h1>
-      <p class="text-xl text-white opacity-90">Sistema inteligente para gesti贸n de tiempo</p>
+      <p class="text-xl text-white opacity-90">Sistema inteligente para gestión de tiempo</p>
       <div class="mt-4 flex items-center justify-center gap-3">
         <button id="toggleTheme" class="btn btn-gray" aria-label="Cambiar tema claro u oscuro">
           <i class="fas fa-adjust mr-2"></i><span id="themeText">Modo oscuro</span>
@@ -623,12 +623,12 @@ setTimeout(() => {
             <div class="bg-green-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-user-plus text-green-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">鉃?Alta de Trabajador</h3>
+            <h3 class="text-xl font-bold text-gray-800">�?Alta de Trabajador</h3>
           </header>
           <div class="space-y-4">
             <label class="block">
               <span class="text-sm font-medium text-gray-700">Nombre Completo</span>
-              <input id="inputNombre" type="text" maxlength="60" placeholder="Ej: Juan P茅rez" class="w-full" required aria-label="Nombre completo del trabajador" />
+              <input id="inputNombre" type="text" maxlength="60" placeholder="Ej: Juan Pérez" class="w-full" required aria-label="Nombre completo del trabajador" />
             </label>
             <label class="block">
               <span class="text-sm font-medium text-gray-700">Documento de Identidad (DNI/NIE)</span>
@@ -646,13 +646,13 @@ setTimeout(() => {
             <div class="bg-red-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-user-minus text-red-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">鉃?Baja de Trabajador</h3>
+            <h3 class="text-xl font-bold text-gray-800">�?Baja de Trabajador</h3>
           </header>
           <div class="space-y-4">
             <div class="flex items-center gap-3">
               <label class="inline-flex items-center gap-2">
                 <input type="radio" name="bajaTipo" value="numero" checked />
-                <span>N潞</span>
+                <span>Nº</span>
               </label>
               <label class="inline-flex items-center gap-2">
                 <input type="radio" name="bajaTipo" value="dni" />
@@ -661,7 +661,7 @@ setTimeout(() => {
             </div>
             <label class="block">
               <span class="text-sm font-medium text-gray-700">Identificador</span>
-              <input id="inputBaja" type="text" placeholder="Introduce N潞 o DNI seg煤n selecci贸n" class="w-full" aria-label="Identificador para dar de baja: n煤mero o DNI" />
+              <input id="inputBaja" type="text" placeholder="Introduce Nº o DNI según selección" class="w-full" aria-label="Identificador para dar de baja: número o DNI" />
             </label>
             <button id="btnBaja" class="btn btn-red w-full" aria-label="Dar de baja trabajador seleccionado">
               <i class="fas fa-trash-alt mr-2"></i>Dar de Baja
@@ -675,13 +675,13 @@ setTimeout(() => {
             <div class="bg-blue-100 p-3 rounded-full mr-3" aria-hidden="true">
               <i class="fas fa-clock text-blue-600 text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800">馃晸 Registrar Entrada/Salida</h3>
+            <h3 class="text-xl font-bold text-gray-800">🕓 Registrar Entrada/Salida</h3>
           </header>
           <div class="space-y-4">
             <div class="flex items-center gap-3">
               <label class="inline-flex items-center gap-2">
                 <input type="radio" name="regTipo" value="numero" checked />
-                <span>N潞</span>
+                <span>Nº</span>
               </label>
               <label class="inline-flex items-center gap-2">
                 <input type="radio" name="regTipo" value="dni" />
@@ -690,11 +690,11 @@ setTimeout(() => {
             </div>
             <label class="block">
               <span class="text-sm font-medium text-gray-700">Identificador</span>
-              <input id="inputRegistro" type="text" placeholder="Escribe N潞 o DNI y pulsa Enter o bot贸n" class="w-full pulse" aria-label="Identificador de trabajador: n煤mero o DNI" />
+              <input id="inputRegistro" type="text" placeholder="Escribe Nº o DNI y pulsa Enter o botón" class="w-full pulse" aria-label="Identificador de trabajador: número o DNI" />
             </label>
             <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
               <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>
-              Sin registro abierto hoy 鈫?<b>Entrada</b>. Si hay entrada sin salida 鈫?<b>Salida</b>. Permite <b>varios tramos</b> al d铆a.
+              Sin registro abierto hoy �?<b>Entrada</b>. Si hay entrada sin salida �?<b>Salida</b>. Permite <b>varios tramos</b> al día.
             </div>
             <button id="btnRegistro" class="btn btn-blue w-full pressable" aria-label="Registrar ahora">
               <i class="fas fa-fingerprint mr-2"></i>Registrar Ahora
@@ -740,7 +740,7 @@ setTimeout(() => {
           </button>
         </div>
 
-        <!-- Resumen mensual autom谩tico -->
+        <!-- Resumen mensual automático -->
         <div id="resumenMensual" class="mt-4 hidden">
           <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900">
             <strong>Resumen del mes seleccionado:</strong>
@@ -761,7 +761,7 @@ setTimeout(() => {
       </section>
 
       <!-- Backup / Restore -->
-      <section class="bg-gray-50 p-6 rounded-xl mb-8 flex gap-4" aria-label="Copia de seguridad y restauraci贸n">
+      <section class="bg-gray-50 p-6 rounded-xl mb-8 flex gap-4" aria-label="Copia de seguridad y restauración">
         <button id="btnBackup" class="btn btn-gray flex-1" aria-label="Descargar copia de seguridad">
           <i class="fas fa-download mr-2"></i>Backup
         </button>
@@ -772,24 +772,24 @@ setTimeout(() => {
         <button id="btnRegistroManual" class="btn btn-blue flex-1" aria-label="Registro manual de horas">
           <i class="fas fa-edit mr-2"></i>Registro Manual
         </button>
-        <button id="btnCambioPass" class="btn btn-purple flex-1" aria-label="Cambiar contrase帽a">
+        <button id="btnCambioPass" class="btn btn-purple flex-1" aria-label="Cambiar contraseña">
           <i class="fas fa-key mr-2"></i>Cambiar Pass
         </button>
       </section>
 
-      <!-- 馃搳 Gr谩ficas -->
-      <section class="bg-gray-50 p-6 rounded-xl mb-8" aria-label="Gr谩ficas de horas">
+      <!-- 📊 Gráficas -->
+      <section class="bg-gray-50 p-6 rounded-xl mb-8" aria-label="Gráficas de horas">
         <h3 class="text-lg font-semibold mb-4 text-gray-800">
-          <i class="fas fa-chart-bar mr-2"></i>Estad铆sticas
+          <i class="fas fa-chart-bar mr-2"></i>Estadísticas
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h4 class="text-center font-bold mb-2">Horas por Semana</h4>
-            <canvas id="chartSemanal" height="200" aria-label="Gr谩fico de horas por semana"></canvas>
+            <canvas id="chartSemanal" height="200" aria-label="Gráfico de horas por semana"></canvas>
           </div>
           <div>
             <h4 class="text-center font-bold mb-2">Horas por Mes</h4>
-            <canvas id="chartMensual" height="200" aria-label="Gr谩fico de horas por mes"></canvas>
+            <canvas id="chartMensual" height="200" aria-label="Gráfico de horas por mes"></canvas>
           </div>
         </div>
       </section>
@@ -801,14 +801,14 @@ setTimeout(() => {
             <i class="fas fa-table mr-2"></i>Registro de Horas
           </h3>
           <div class="text-lg font-bold text-purple-700 contrast-strong">
-            Total del per铆odo: <span id="totalHoras" class="text-2xl">0.00</span> h
+            Total del período: <span id="totalHoras" class="text-2xl">0.00</span> h
           </div>
         </header>
         <div class="overflow-auto max-h-96 rounded-lg shadow">
           <table id="tablaHoras" class="min-w-full bg-white">
             <thead class="sticky top-0 bg-gray-100">
               <tr>
-                <th>Trabajador N潞</th>
+                <th>Trabajador Nº</th>
                 <th>Fecha</th>
                 <th>Entrada</th>
                 <th>Salida</th>
@@ -836,7 +836,7 @@ setTimeout(() => {
         <i class="fas fa-exclamation-triangle"></i> ZONA DE ADMINISTRADOR
     </p>
     <button onclick="borrarTodoSistema()" style="background-color: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold;">
-        馃棏锔?BORRAR TODOS LOS REGISTROS
+        🗑�?BORRAR TODOS LOS REGISTROS
     </button>
 </div>
       </main>
@@ -845,7 +845,7 @@ setTimeout(() => {
 
     <!-- Footer -->
     <footer class="text-center text-white opacity-80">
-      <p>漏 Sistema de Control de Horas</p>
+      <p>© Sistema de Control de Horas</p>
     </footer>
   </div>
 
@@ -884,7 +884,7 @@ try {
             timestamp: new Date().toISOString(),
             usuario: "Sistema_Gines"
         });
-        console.log("?Sincronizado en la colección registros_v2026");
+        console.log("?Sincronizado en la colecci��n registros_v2026");
     }
 } catch (e) {
     console.error("?Error al sincronizar con la nube:", e);
@@ -921,7 +921,7 @@ try {
       toast.className = `toast ${type}`;
       const icon = document.createElement("span");
       icon.className = "icon";
-      icon.innerHTML = ({ success:"鉁?, error:"鉀?, warning:"鈿狅笍", info:"鈩癸笍" })[type] || "鈩癸笍";
+      icon.innerHTML = ({ success:"�?, error:"�?, warning:"⚠️", info:"ℹ️" })[type] || "ℹ️";
       const text = document.createElement("div");
       text.textContent = msg;
       toast.appendChild(icon);
@@ -992,7 +992,7 @@ try {
           usuarioActual.rol === "admin" ? "block" : "none";
         document.getElementById("btnCambioPass").style.display = 
           usuarioActual.rol === "admin" ? "block" : "none";
-        showBanner(`鉁?Bienvenido, ${usuario} (${user.rol})`, "success");
+        showBanner(`�?Bienvenido, ${usuario} (${user.rol})`, "success");
         return true;
       }
       return false;
@@ -1006,22 +1006,22 @@ try {
       document.getElementById("loginPassword").value = "";
       document.getElementById("loginError").classList.add("hidden");
     }
-	// === NUEVA FUNCI脫N PARA CREAR USUARIOS ===
+	// === NUEVA FUNCIÓN PARA CREAR USUARIOS ===
     window.registrarNuevoUsuario = async (email, password) => {
         try {
             const { getAuth, createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
             const auth = getAuth();
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            alert("鉁?Usuario creado con 茅xito: " + user.email);
+            alert("�?Usuario creado con éxito: " + user.email);
             return user;
         } catch (error) {
             let mensaje = "Error al crear usuario";
-            if (error.code === 'auth/email-already-in-use') mensaje = "El email ya est谩 registrado";
-            if (error.code === 'auth/weak-password') mensaje = "La contrase帽a es muy d茅bil (m铆nimo 6 caracteres)";
-            if (error.code === 'auth/invalid-email') mensaje = "El formato del email no es v谩lido";
+            if (error.code === 'auth/email-already-in-use') mensaje = "El email ya está registrado";
+            if (error.code === 'auth/weak-password') mensaje = "La contraseña es muy débil (mínimo 6 caracteres)";
+            if (error.code === 'auth/invalid-email') mensaje = "El formato del email no es válido";
             
-            alert("鉂?" + mensaje);
+            alert("�?" + mensaje);
             console.error(error);
         }
     };
@@ -1051,16 +1051,19 @@ try {
      * STORAGE
      ***************************************************/
     if (!supportsLocalStorage) {
-      alert("Este navegador no soporta localStorage. La app no podr谩 guardar los datos.");
+      alert("Este navegador no soporta localStorage. La app no podrá guardar los datos.");
     }
 
     let trabajadores = lsGet("trabajadores", []);
     let registros = lsGet("registros", []);
 
-    /** Persiste todo */
+ /** Persiste todo */
     function guardarDatos() {
       lsSet("trabajadores", trabajadores);
-    
+      // Solo guardamos registros si hay alguno, as�� evitamos los vac��os al inicio
+      if (registros && registros.length > 0) {
+        lsSet("registros", registros);
+      }
     }
 
     /***************************************************
@@ -1077,7 +1080,7 @@ try {
       
       if (!val) return false;
       
-      // Validaci贸n de letra
+      // Validación de letra
       const dniStr = String(dni).toUpperCase();
       const map = { X: 0, Y: 1, Z: 2 };
       let num = dniStr;
@@ -1121,9 +1124,9 @@ try {
 
 
 async function altaTrabajador(nombre, dni) {
-    // 馃洝锔?BLOQUEO DE SEGURIDAD: Evita registros vac铆os al cargar la p谩gina
+    // 🛡�?BLOQUEO DE SEGURIDAD: Evita registros vacíos al cargar la página
     if (!nombre || nombre === null || nombre.toString().trim() === "" || nombre === "null" || nombre === undefined) {
-        console.log('[SISTEMA] Registro vac铆o detectado. No se enviar谩 a la nube.');
+        console.log('[SISTEMA] Registro vacío detectado. No se enviará a la nube.');
         return; 
     }
 
@@ -1131,11 +1134,11 @@ async function altaTrabajador(nombre, dni) {
 
     // Tus validaciones actuales
     if (!validarNombre(nombre)) {
-        showBanner("鉂?El nombre no puede estar vac铆o.", "error");
+        showBanner("�?El nombre no puede estar vacío.", "error");
         return;
     }
     if (!validarDNI(dni)) {
-        showBanner("鉂?DNI/NIE no v谩lido.", "error");
+        showBanner("�?DNI/NIE no válido.", "error");
         return;
     }
     
@@ -1145,7 +1148,7 @@ async function altaTrabajador(nombre, dni) {
         return;
     }
 
-    // ... aqu铆 sigue tu c贸digo para guardar en Firebase (addDoc, etc.) ...
+    // ... aquí sigue tu código para guardar en Firebase (addDoc, etc.) ...
 
     const nextNumber = trabajadores.length ? Math.max(...trabajadores.map(t => t.numero)) + 1 : 1;
     
@@ -1164,7 +1167,7 @@ async function altaTrabajador(nombre, dni) {
 
     // 2. ENVIAMOS AL PC 2 (ESTO ES LO QUE FALTABA)
     if (typeof subirDatosNube === 'function') {
-        console.log("鈽侊笍 Subiendo nuevo trabajador a la nube...");
+        console.log("☁️ Subiendo nuevo trabajador a la nube...");
         await subirDatosNube('trabajadores_v2026', trabajadores);
     }
 
@@ -1172,7 +1175,7 @@ async function altaTrabajador(nombre, dni) {
     if (typeof actualizarSelector === 'function') actualizarSelector();
     if (typeof renderTabla === 'function') renderTabla(); // Para refrescar si tienes lista visible
     
-    showBanner(`鉁?Alta: ${nuevo.nombre} (n潞 ${nuevo.numero})`, "success");
+    showBanner(`�?Alta: ${nuevo.nombre} (nº ${nuevo.numero})`, "success");
 }
 
 async function bajaTrabajador(valor, tipo) {
@@ -1183,8 +1186,8 @@ async function bajaTrabajador(valor, tipo) {
         trabajador = trabajadores.find(t => t.numero == valor);
     }
 
-    if (!trabajador) { showBanner("鉂?Trabajador no encontrado.", "error"); return; }
-    if (!confirm(`驴Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
+    if (!trabajador) { showBanner("�?Trabajador no encontrado.", "error"); return; }
+    if (!confirm(`¿Seguro que quieres dar de baja al trabajador ${trabajador.nombre}?`)) return;
 
     trabajador.estado = "Baja";
     
@@ -1193,13 +1196,13 @@ async function bajaTrabajador(valor, tipo) {
 
     // 2. ENVIAMOS LA BAJA AL PC 2
     if (typeof subirDatosNube === 'function') {
-        console.log("鈽侊笍 Sincronizando baja en la nube...");
+        console.log("☁️ Sincronizando baja en la nube...");
         await subirDatosNube('trabajadores_v2026', trabajadores);
     }
 
     if (typeof actualizarSelector === 'function') actualizarSelector();
     
-    showBanner(`馃洃 Baja: ${trabajador.nombre}`, "success");
+    showBanner(`🛑 Baja: ${trabajador.nombre}`, "success");
 }
 
     /***************************************************
@@ -1214,8 +1217,8 @@ async function bajaTrabajador(valor, tipo) {
 
     function registrarEntradaSalida(valor, tipo) {
       const trabajador = buscarTrabajadorPorInput(valor, tipo);
-      if (!trabajador) return showBanner("鉂?Trabajador no encontrado.", "error");
-      if ((trabajador.estado || "Activo") !== "Activo") return showBanner("馃毇 El trabajador est谩 de baja.", "warning");
+      if (!trabajador) return showBanner("�?Trabajador no encontrado.", "error");
+      if ((trabajador.estado || "Activo") !== "Activo") return showBanner("🚫 El trabajador está de baja.", "warning");
 
       const hoy = new Date().toISOString().slice(0,10);
       let abierto = registros.find(r => r.fecha === hoy && r.trabajadorId === trabajador.id && !r.salidaISO);
@@ -1235,7 +1238,7 @@ async function bajaTrabajador(valor, tipo) {
         registros.push(reg);
         guardarDatos();
         refreshUI();
-        showBanner(`馃煝 Entrada registrada: ${trabajador.nombre} (n潞 ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
+        showBanner(`🟢 Entrada registrada: ${trabajador.nombre} (nº ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
       } else {
         // Registrar salida
         const ahora = new Date();
@@ -1252,7 +1255,7 @@ async function bajaTrabajador(valor, tipo) {
         
         guardarDatos();
         refreshUI();
-        showBanner(`馃數 Salida registrada: ${trabajador.nombre} (n潞 ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
+        showBanner(`🔵 Salida registrada: ${trabajador.nombre} (nº ${trabajador.numero}) a las ${formatTimeForRender(ahoraISO)}`, "success");
       }
     }
 
@@ -1261,7 +1264,7 @@ async function bajaTrabajador(valor, tipo) {
      ***************************************************/
     function abrirModalRegistroManual() {
       if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
+        showBanner("🚫 Acceso denegado. Solo administradores.", "error");
         return;
       }
       const modal = document.getElementById("modalRegistroManual");
@@ -1281,7 +1284,7 @@ async function bajaTrabajador(valor, tipo) {
       const salida = document.getElementById("manualSalida").value;
 
       if (!trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
+        showBanner("�?Todos los campos son obligatorios.", "error");
         return;
       }
 
@@ -1290,7 +1293,7 @@ async function bajaTrabajador(valor, tipo) {
       const salidaDate = new Date(`${fecha}T${salida}`);
       
       if (salidaDate <= entradaDate) {
-        showBanner("鉂?La hora de salida debe ser posterior a la entrada.", "error");
+        showBanner("�?La hora de salida debe ser posterior a la entrada.", "error");
         return;
       }
 
@@ -1313,15 +1316,15 @@ async function bajaTrabajador(valor, tipo) {
       guardarDatos();
       refreshUI();
       cerrarModalRegistroManual();
-      showBanner(`鉁?Registro manual guardado correctamente.`, "success");
+      showBanner(`�?Registro manual guardado correctamente.`, "success");
     }
 
     /***************************************************
-     * CAMBIO DE CONTRASE脩A
+     * CAMBIO DE CONTRASEÑA
      ***************************************************/
     function abrirModalCambioPass() {
       if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
+        showBanner("🚫 Acceso denegado. Solo administradores.", "error");
         return;
       }
       document.getElementById("modalCambioPass").style.display = "flex";
@@ -1339,20 +1342,20 @@ async function bajaTrabajador(valor, tipo) {
       const confirmarPass = document.getElementById("confirmarPassword").value;
 
       if (!nuevaPass || !confirmarPass) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
+        showBanner("�?Todos los campos son obligatorios.", "error");
         return;
       }
 
       if (nuevaPass !== confirmarPass) {
-        showBanner("鉂?Las contrase帽as no coinciden.", "error");
+        showBanner("�?Las contraseñas no coinciden.", "error");
         return;
       }
 
       if (cambiarPassword(usuario, nuevaPass)) {
-        showBanner(`鉁?Contrase帽a cambiada para ${usuario}`, "success");
+        showBanner(`�?Contraseña cambiada para ${usuario}`, "success");
         cerrarModalCambioPass();
       } else {
-        showBanner("鉂?Error al cambiar la contrase帽a.", "error");
+        showBanner("�?Error al cambiar la contraseña.", "error");
       }
     }
 
@@ -1361,7 +1364,7 @@ async function bajaTrabajador(valor, tipo) {
      ***************************************************/
     function abrirModalEditarRegistro(registroId) {
       if (usuarioActual.rol !== "admin") {
-        showBanner("馃毇 Acceso denegado. Solo administradores.", "error");
+        showBanner("🚫 Acceso denegado. Solo administradores.", "error");
         return;
       }
       
@@ -1389,7 +1392,7 @@ async function bajaTrabajador(valor, tipo) {
       const salida = document.getElementById("editarSalida").value;
 
       if (!registroId || !trabajadorId || !fecha || !entrada || !salida) {
-        showBanner("鉂?Todos los campos son obligatorios.", "error");
+        showBanner("�?Todos los campos son obligatorios.", "error");
         return;
       }
 
@@ -1398,7 +1401,7 @@ async function bajaTrabajador(valor, tipo) {
       const salidaDate = new Date(`${fecha}T${salida}`);
       
       if (salidaDate <= entradaDate) {
-        showBanner("鉂?La hora de salida debe ser posterior a la entrada.", "error");
+        showBanner("�?La hora de salida debe ser posterior a la entrada.", "error");
         return;
       }
 
@@ -1419,7 +1422,7 @@ async function bajaTrabajador(valor, tipo) {
         guardarDatos();
         refreshUI();
         cerrarModalEditarRegistro();
-        showBanner(`鉁?Registro actualizado correctamente.`, "success");
+        showBanner(`�?Registro actualizado correctamente.`, "success");
       }
     }
 
@@ -1463,13 +1466,13 @@ async function bajaTrabajador(valor, tipo) {
 
 
 function renderTabla() {
-      console.log("馃帹 Dibujando tabla de registros...");
+      console.log("🎨 Dibujando tabla de registros...");
       const tbody = document.querySelector("#tablaHoras tbody");
       if (!tbody) return;
       
       tbody.innerHTML = "";
       
-      // Intentamos obtener los datos. Si 'obtenerDatosFiltrados' falla o est谩 vac铆o, usamos la variable global.
+      // Intentamos obtener los datos. Si 'obtenerDatosFiltrados' falla o está vacío, usamos la variable global.
       const filtrado = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
       let datosAMostrar = filtrado.datos || [];
       
@@ -1489,7 +1492,7 @@ function renderTabla() {
 
       let total = 0;
 
-      // --- ORDENACI脫N ROBUSTA (Corrigiendo el error localeCompare) ---
+      // --- ORDENACIÓN ROBUSTA (Corrigiendo el error localeCompare) ---
       datosAMostrar.sort((a, b) => {
         // Aseguramos que siempre sean cadenas de texto (si es nulo, usa "")
         const strA = (a.fecha || "") + (a.entradaISO || "");
@@ -1521,13 +1524,13 @@ function renderTabla() {
 
       const totalEl = document.getElementById("totalHoras");
       if (totalEl) totalEl.textContent = total.toFixed(2);
-      console.log("鉁?隆Tabla pintada con 茅xito!");
+      console.log("�?¡Tabla pintada con éxito!");
     }
 
     /** CSV */
     function exportCSV() {
       const { datos } = (typeof obtenerDatosFiltrados === 'function') ? obtenerDatosFiltrados() : { datos: [] };
-      const header = ["Trabajador N潞","Nombre","DNI","Fecha","Entrada","Salida","Horas"];
+      const header = ["Trabajador Nº","Nombre","DNI","Fecha","Entrada","Salida","Horas"];
       const lines = [header.join(";")];
 
       const tById = new Map((typeof trabajadores !== 'undefined' ? trabajadores : []).map(t => [t.id, t]));
@@ -1548,7 +1551,7 @@ function renderTabla() {
       lines.push(["","","","TOTAL","","", total.toFixed(2)].join(";"));
 
       downloadBlob(`exportacion_horas.csv`, "text/csv;charset=utf-8", lines.join("\n"));
-      if (typeof showBanner === 'function') showBanner("馃搫 CSV exportado.", "success");
+      if (typeof showBanner === 'function') showBanner("📄 CSV exportado.", "success");
     }
 
     /** Excel simple (HTML table -> abre en Excel) */
@@ -1560,7 +1563,7 @@ function renderTabla() {
       let html = `
         <table border="1">
           <tr><th colspan="7">Registro de Horas</th></tr>
-          <tr><th>Trabajador N潞</th><th>Nombre</th><th>DNI</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th></tr>
+          <tr><th>Trabajador Nº</th><th>Nombre</th><th>DNI</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Horas</th></tr>
       `;
       datos.sort((a,b) => (a.fecha + a.entradaISO).localeCompare(b.fecha + b.entradaISO))
            .forEach(r => {
@@ -1581,7 +1584,7 @@ function renderTabla() {
 
       const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
       downloadBlob(`horas_${filtro}.xls`, "application/vnd.ms-excel", html);
-      showBanner("馃搳 Excel exportado.", "success");
+      showBanner("📊 Excel exportado.", "success");
     }
 
     /** PDF completo */
@@ -1601,7 +1604,7 @@ function renderTabla() {
       const doc = new jsPDF();
 
       const titulo = "Registro de Horas";
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "鈥?}  Hasta: ${hasta || "鈥?}` : "Todos los registros";
+      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "�?}  Hasta: ${hasta || "�?}` : "Todos los registros";
 
       doc.setFontSize(16);
       doc.text(titulo, 14, 16);
@@ -1609,7 +1612,7 @@ function renderTabla() {
       doc.text(sub, 14, 22);
 
       doc.autoTable({
-        head: [["N潞","Nombre","DNI","Fecha","Entrada","Salida","Horas"]],
+        head: [["Nº","Nombre","DNI","Fecha","Entrada","Salida","Horas"]],
         body: rows,
         startY: 28,
         styles: { fontSize: 9 },
@@ -1622,10 +1625,10 @@ function renderTabla() {
 
       const filtro = mes ? `mes_${mes}` : (desde || hasta) ? `rango_${desde||""}_${hasta||""}` : "todos";
       doc.save(`horas_${filtro}.pdf`);
-      showBanner("馃Ь PDF exportado.", "success");
+      showBanner("🧾 PDF exportado.", "success");
     }
 
-    /** PDF Resumen (por d铆a) */
+    /** PDF Resumen (por día) */
     function exportPDFResumen() {
       const { datos, mes, desde, hasta } = obtenerDatosFiltrados();
       const mapDia = {};
@@ -1641,8 +1644,8 @@ function renderTabla() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16);
-      doc.text("Resumen de Horas por D铆a", 14, 16);
-      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "鈥?}  Hasta: ${hasta || "鈥?}` : "Todos los registros";
+      doc.text("Resumen de Horas por Día", 14, 16);
+      const sub = mes ? `Mes: ${mes}` : (desde || hasta) ? `Desde: ${desde || "�?}  Hasta: ${hasta || "�?}` : "Todos los registros";
       doc.setFontSize(10);
       doc.text(sub, 14, 22);
 
@@ -1671,9 +1674,9 @@ function renderTabla() {
       renderTabla();
     }
 
-    // Inicializaci贸n
+    // Inicialización
     document.addEventListener("DOMContentLoaded", () => {
-      // Verificar sesi贸n
+      // Verificar sesión
       const savedUser = lsGet("usuarioActual", null);
       if (savedUser) {
         usuarioActual = savedUser;
@@ -1720,7 +1723,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const passEl = document.getElementById("loginPassword");
             
             if (typeof login === 'function' && login(userEl.value, passEl.value)) {
-                console.log("馃攼 Login correcto. Sincronizando datos...");
+                console.log("🔐 Login correcto. Sincronizando datos...");
                 
                 // Descarga profunda para que el PC 1 vea lo del PC 2
                 if (typeof descargarDatosNube === 'function') {
@@ -1728,12 +1731,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 document.getElementById("loginContainer").classList.add("hidden");
-                console.log("馃殌 PC 1 actualizado y dentro.");
+                console.log("🚀 PC 1 actualizado y dentro.");
             } else {
-                alert("Usuario o contrase帽a incorrectos");
+                alert("Usuario o contraseña incorrectos");
             }
         };
-		// === V脥NCULO DEL BOT脫N VERDE CON LA FUNCI脫N DE CREAR USUARIO ===
+		// === VÍNCULO DEL BOTÓN VERDE CON LA FUNCIÓN DE CREAR USUARIO ===
       const btnRegistro = document.getElementById("btnRegistro");
       if (btnRegistro) {
           btnRegistro.onclick = async () => {
@@ -1741,11 +1744,11 @@ document.addEventListener("DOMContentLoaded", () => {
               const passEl = document.getElementById("loginPassword");
               
               if (!userEl.value || !passEl.value) {
-                  alert("鈿狅笍 Escribe un email y contrase帽a en los campos de arriba para poder crear el usuario.");
+                  alert("⚠️ Escribe un email y contraseña en los campos de arriba para poder crear el usuario.");
                   return;
               }
               
-              // Ejecutamos la funci贸n que creamos en el Paso 2
+              // Ejecutamos la función que creamos en el Paso 2
               await window.registrarNuevoUsuario(userEl.value, passEl.value);
           };
       }
@@ -1754,7 +1757,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		
     }
 
-    // 2. VER CONTRASE脩A (EL OJO)
+    // 2. VER CONTRASEÑA (EL OJO)
     const btnOjo = document.getElementById("toggleLoginPassword");
     if (btnOjo) {
         btnOjo.onclick = () => {
@@ -1786,7 +1789,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // 5. GESTI脫N DE TRABAJADORES (ALTA/BAJA)
+    // 5. GESTIÓN DE TRABAJADORES (ALTA/BAJA)
     const btnAlta = document.getElementById("btnAlta");
     if (btnAlta) {
         btnAlta.onclick = () => {
@@ -1837,7 +1840,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 	  async function borrarTodoSistema() {
-    // La confirmaci贸n que ped铆as
+    // La confirmación que pedías
     if (confirma("ESTAS SEGURO? Se borraran todos los fichajes de la NUBE y de este PC definitivamente.")) {
         
         try {
@@ -1857,7 +1860,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 3. Limpiamos la memoria del PC
             localStorage.clear();
 
-            alert("鉁?Todo borrado. La p谩gina se reiniciar谩.");
+            alert("�?Todo borrado. La página se reiniciará.");
             location.reload();
 
         } catch (error) {
