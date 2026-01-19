@@ -1807,61 +1807,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
     }
+// ... (Aquí vendría el resto de tu código anterior)
 
-// 5. GESTIÓN DE TRABAJADORES (ALTA/BAJA)
-const btnAlta = document.getElementById("btnAlta");
-if (btnAlta) {
-    btnAlta.onclick = () => {
-        const n = document.getElementById("inputNombre").value;
-        const d = document.getElementById("inputDNI").value;
-        if (typeof altaTrabajador === 'function') {
-            altaTrabajador(n, d);
-            document.getElementById("inputNombre").value = "";
-            document.getElementById("inputDNI").value = "";
-            // Forzamos el guardado en la nube tras el alta
-            if (typeof guardarDatos === 'function') guardarDatos();
-        }
+    // 8. CIERRE DE MODALES AL CLICAR FUERA
+    window.onclick = (e) => {
+        const modalReg = document.getElementById("modalRegistroManual");
+        const modalEdi = document.getElementById("modalEditarRegistro");
+        const modalPass = document.getElementById("modalCambioPass");
+        
+        if (e.target === modalReg && typeof cerrarModalRegistroManual === 'function') cerrarModalRegistroManual();
+        if (e.target === modalEdi && typeof cerrarModalEditarRegistro === 'function') cerrarModalEditarRegistro();
+        if (e.target === modalPass && typeof cerrarModalCambioPass === 'function') cerrarModalCambioPass();
     };
-}
 
-// 6. EXPORTACIONES
-const vincular = (id, fn) => {
-    const el = document.getElementById(id);
-    if (el) el.onclick = fn;
-};
+    // Inicializar UI al cargar
+    setTimeout(() => {
+        if (typeof refreshUI === 'function') refreshUI();
+    }, 1000);
 
-vincular("btnExportar", () => typeof exportCSV === 'function' && exportCSV());
-vincular("btnExportarExcel", () => typeof exportExcel === 'function' && exportExcel());
-vincular("btnExportarPDF", () => typeof exportPDF === 'function' && exportPDF());
-vincular("btnExportarPDFResumen", () => typeof exportPDFResumen === 'function' && exportPDFResumen());
+}); // <--- ESTE ES EL CIERRE DEL DOMCONTENTLOADED
 
-// 7. MODALES Y FILTROS
-vincular("btnRegistroManual", () => typeof abrirModalRegistroManual === 'function' && abrirModalRegistroManual());
-vincular("cerrarModal", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-vincular("btnCancelarManual", () => typeof cerrarModalRegistroManual === 'function' && cerrarModalRegistroManual());
-vincular("btnGuardarManual", () => typeof guardarRegistroManual === 'function' && guardarRegistroManual());
+// --- FUNCIONES GLOBALES (FUERA DEL EVENTO PRINCIPAL) ---
 
-vincular("cerrarModalEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-vincular("btnCancelarEditar", () => typeof cerrarModalEditarRegistro === 'function' && cerrarModalEditarRegistro());
-vincular("btnGuardarEditar", () => typeof guardarEditarRegistro === 'function' && guardarEditarRegistro());
-
-// 8. CIERRE DE MODALES AL CLICAR FUERA
-window.onclick = (e) => {
-    const modalReg = document.getElementById("modalRegistroManual");
-    const modalEdi = document.getElementById("modalEditarRegistro");
-    const modalPass = document.getElementById("modalCambioPass");
-    
-    if (e.target === modalReg) cerrarModalRegistroManual();
-    if (e.target === modalEdi) cerrarModalEditarRegistro();
-    if (e.target === modalPass) cerrarModalCambioPass();
-};
-
-// Inicializar UI al cargar
-setTimeout(() => {
-    if (typeof refreshUI === 'function') refreshUI();
-}, 1000);
-
-// --- FUNCIÓN DE GUARDADO CORREGIDA (Línea 1869 aprox) ---
 async function guardarDatos() {
     if (!window.dbCloud) return;
     try {
@@ -1886,48 +1853,38 @@ async function guardarDatos() {
                 timestamp: new Date().toISOString()
             });
         }
-        console.log("✅ Nube sincronizada (Trabajadores y Fichajes)");
+        console.log("✅ Nube sincronizada");
     } catch (error) {
-        console.error("❌ Error al guardar en nube:", error);
+        console.error("❌ Error al guardar:", error);
     }
 }
 
-// --- FUNCIÓN DE BORRADO UNIFICADA (Línea 1899 aprox) ---
 async function borrarTodoSistema() {
-    if (confirm("¿ESTÁS SEGURO? Se borrarán los fichajes de la NUBE y del PC definitivamente.")) {
-        try {
-            const baseDatos = window.dbCloud;
-            const _collection = window.collection;
-            const _getDocs = window.getDocs;
-            const _deleteDoc = window.deleteDoc;
-            const _doc = window.doc;
+    if (!confirm("¿ESTÁS SEGURO? Se borrará TODO definitivamente.")) return;
+    try {
+        const baseDatos = window.dbCloud;
+        const _collection = window.collection;
+        const _getDocs = window.getDocs;
+        const _deleteDoc = window.deleteDoc;
+        const _doc = window.doc;
 
-            // 1. Limpiar Nube (Registros)
-            const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
-            for (const d of snapshot.docs) {
-                await _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id));
-            }
-
-            // 2. Limpiar Nube (Trabajadores - Opcional, quítalo si quieres mantenerlos)
-            const snapTrab = await _getDocs(_collection(baseDatos, 'trabajadores_v2026'));
-            for (const d of snapTrab.docs) {
-                await _deleteDoc(_doc(baseDatos, 'trabajadores_v2026', d.id));
-            }
-
-            // 3. Limpiar PC
-            localStorage.removeItem("registros");
-            localStorage.removeItem("fichajes");
-            localStorage.removeItem("trabajadores");
-
-            alert("Sistema reseteado con éxito.");
-            location.reload();
-        } catch (error) {
-            console.error(error);
-            alert("Error al borrar. Revisa la consola.");
+        const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
+        for (const d of snapshot.docs) {
+            await _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id));
         }
+
+        localStorage.removeItem("registros");
+        localStorage.removeItem("fichajes");
+        localStorage.removeItem("trabajadores");
+
+        alert("Sistema limpio.");
+        location.reload();
+    } catch (error) {
+        console.error(error);
     }
 }
-  
 </script>
-	</body>
+</body>
 </html>
+
+
