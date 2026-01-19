@@ -1877,6 +1877,32 @@ localStorage.removeItem("fichajes");
     }
 }
 
+async function borrarTodoSistema() {
+    if (confirm("¿ESTÁS SEGURO? Se borrarán los fichajes de la NUBE y del PC, pero mantendremos tu contraseña.")) {
+        try {
+            const baseDatos = window.dbCloud;
+            const _collection = window.collection;
+            const _getDocs = window.getDocs;
+            const _deleteDoc = window.deleteDoc;
+            const _doc = window.doc;
+
+            // 1. Limpiar Nube
+            const snapshot = await _getDocs(_collection(baseDatos, 'registros_v2026'));
+            const promesas = snapshot.docs.map(d => _deleteDoc(_doc(baseDatos, 'registros_v2026', d.id)));
+            await Promise.all(promesas);
+
+            // 2. Limpiar PC (Solo registros, NO la contraseña)
+            localStorage.removeItem("registros");
+            localStorage.removeItem("fichajes");
+
+            alert("Sistema limpio. La página se recargará.");
+            location.reload();
+        } catch (error) {
+            console.error(error);
+            alert("Error al borrar. Mira la consola.");
+        }
+    }
+}	  
 </script>
 	</body>
 </html>
