@@ -370,9 +370,8 @@
     window.deleteDoc = deleteDoc;
 
 // --- LÍNEA 335: NUEVA FUNCIÓN DE DESCARGA AUTÓNOMA ---
-
-	  async function descargarDatosNube() {
-    console.log("📡 [PC 1] Descargando registros individuales de la nube...");
+async function descargarDatosNube() {
+    console.log("📡 [PC 1] Descargando registros de la nube...");
 
     try {
         const _collection = window.collection;
@@ -382,7 +381,7 @@
         const baseDatos = window.dbCloud || db;
 
         if (!_getDocs || !_collection) {
-            console.error("?No tengo las herramientas de lectura");
+            console.error("❌ No tengo las herramientas de lectura de Firebase");
             return;
         }
 
@@ -401,32 +400,38 @@
             }
         });
 
-        if (datosRecuperados.length > 0) {
-           
-            
-            // Intentamos asignar a la variable global que use tu sistema
-            if (typeof fichajes !== 'undefined') {
-                fichajes = datosRecuperados;
-            } else if (typeof registros !== 'undefined') {
-                registros = datosRecuperados;
+        // FILTRO DE SEGURIDAD: Solo aceptamos registros que tengan datos reales
+        const datosValidos = datosRecuperados.filter(r => r && (r.trabajadorId || r.id));
+
+        if (datosValidos.length > 0) {
+            // Asignamos a las variables globales solo si hay datos reales
+            if (typeof registros !== 'undefined') {
+                registros = datosValidos;
             }
-            
-            console.log(`?¡ÉXITO! Se han recuperado ${datosRecuperados.length} registros.`);
+            if (typeof fichajes !== 'undefined') {
+                fichajes = datosValidos;
+            }
+            console.log(`✅ ¡ÉXITO! Se han recuperado ${datosValidos.length} registros reales.`);
+        } else {
+            console.log("ℹ️ La nube está vacía. No se crean registros ficticios.");
+            if (typeof registros !== 'undefined') registros = [];
+            if (typeof fichajes !== 'undefined') fichajes = [];
         }
 
         // 3. ACTUALIZAR PANTALLA
-        if (typeof renderTabla === 'function') renderTabla();
+        if (typeof refreshUI === 'function') refreshUI();
+        else if (typeof renderTabla === 'function') renderTabla();
         else if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
 
     } catch (error) {
-        console.error("?Error en la descarga profunda:", error);
+        console.error("❌ Error en la descarga profunda:", error);
     }
 }
-	  
+      
 // --- INICIO AUTOMÁTICO ---
 setTimeout(() => {
     descargarDatosNube();
-}, 2000);
+}, 1500);
 
 </script>
 </head>
